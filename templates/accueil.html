@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Inscription –REK Groupie Tracker</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+    <div class="register-container">
+        <h1>Créer un compte</h1>
+
+        {{if .Error}}
+        <div class="alert alert-error">{{.Error}}</div>
+        {{end}}
+
+        <form action="/register" method="POST" class="register-form">
+
+            <label for="pseudo">Pseudo</label>
+            <input type="text" id="pseudo" name="pseudo" required value="{{with .Values}}{{index . "pseudo"}}{{end}}">
+
+            <label for="email">Adresse email</label>
+            <input type="email" id="email" name="email" required value="{{with .Values}}{{index . "email"}}{{end}}">
+
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="confirm">Confirmation du mot de passe</label>
+            <input type="password" id="confirm" name="confirm" required>
+
+            <button type="submit">S'inscrire</button>
+
+        </form>
+
+        <p class="login-link">
+            Déjà un compte ? <a href="/connexion">Connecte-toi ici</a>
+        </p>
+    </div>
+
+</body>
+</html>

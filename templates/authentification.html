@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion –REK Groupie Tracker</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body> 
+    <div class="authentification-container">
+        <h1>Connexion</h1>
+
+        {{if .Success}}
+        <div class="alert alert-success">{{.Success}}</div>
+        {{end}}
+
+        {{if .Error}}
+        <div class="alert alert-error">{{.Error}}</div>
+        {{end}}
+
+        <form class="authentification-form" action="/login" method="POST">
+            <label for="user">Adresse email ou pseudo</label>
+            <input type="text" id="user" name="user" required value="{{.User}}">
+
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">Se connecter</button>
+        </form>
+        <p class="switch-register">
+            Pas de compte ? <a href="/">Inscris-toi ici</a>
+        </p>
+    </div>
+</body>
+</html>
