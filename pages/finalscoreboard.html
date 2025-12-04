@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HabiBeats</title>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" href="static/hbbts.ico"/>
+</head>
+
+<body>
+    <div class="finalscoreboard-container">
+        <h1>Score final</h1>
+        {{ range . }}
+        <div class="scoreboard">
+            <div class="scoreboard-header">
+                <div class="rank">Place : {{ .Rank }}</div>
+                <div class="username">Pseudo : {{ .Username }}</div>
+            </div>
+        </div>
+        {{ end }}
+        <button class="replay" type="button">Rejouer</button>
+    </div>
+</body>
+</html>
