@@ -6,70 +6,60 @@ body {
     padding: 0;
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
-    /* Fond sombre pour faire ressortir la brillance */
-    background: radial-gradient(circle at center, #2b2b2b 0%, #121212 100%);
+    /* Fond sombre : j'ai légèrement bleuté le fond noir pour harmoniser */
+    background: radial-gradient(circle at center, #1a1f2b 0%, #0a0e14 100%);
     color: #ffffff;
     min-height: 100vh;
 }
 
-
 /* --- Logo DJ --- */
 .logo {
-    width: 180px; /* Ajuste la taille selon tes goûts */
+    width: 180px;
     max-width: 100%;
     height: auto;
-    margin-bottom: 10px; /* Espace entre l'image et le titre H1 */
+    margin-bottom: 10px;
     
-    /* Lueur Orange autour du logo pour le style "Néon" */
-    filter: drop-shadow(0 0 15px rgba(255, 140, 0, 0.5));
+    /* Lueur Bleue autour du logo */
+    filter: drop-shadow(0 0 15px rgba(0, 114, 255, 0.5));
     
-    /* Animation de flottement (Optionnel mais stylé) */
     animation: float 4s ease-in-out infinite;
 }
 
-/* Animation qui fait bouger le logo doucement de haut en bas */
 @keyframes float {
-    0% {
-        transform: translateY(0px);
-    }
-    50% {
-        transform: translateY(-10px);
-    }
-    100% {
-        transform: translateY(0px);
-    }
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
 }
 
 /* --- Header --- */
 header {
     text-align: center;
-    padding: 0 20px 0 20px; /* header ultra compact */
+    padding: 0 20px 0 20px;
 }
 
 header h1 {
     font-size: 3.5rem;
     margin: 0;
     text-transform: uppercase;
-    /* Dégradé de texte Orange/Jaune */
-    background: linear-gradient(to right, #ff8c00, #ffd700);
+    /* Dégradé Bleu Foncé vers Bleu Clair */
+    background: linear-gradient(to right, #0072ff, #00c6ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    /* Effet de brillance autour du texte */
-    filter: drop-shadow(0 0 10px rgba(255, 140, 0, 0.6));
+    /* Effet de brillance bleu */
+    filter: drop-shadow(0 0 10px rgba(0, 114, 255, 0.6));
 }
 
 header h2 {
     font-weight: 400;
-    /* Couleur Or/Jaune */
-    color: #ffd700; 
-    /* Marge du bas à 0 et marge du haut réduite */
+    /* Couleur BLANCHE (conservée) */
+    color: #ffffff; 
     margin-top: 5px;
     margin-bottom: 10px; 
     font-size: 1.4rem;
     text-transform: uppercase;
-    letter-spacing: 2px; /* Espacement des lettres pour le style moderne */
-    /* Petite lueur orange autour du texte */
-    text-shadow: 0 0 8px rgba(255, 140, 0, 0.5); 
+    letter-spacing: 2px;
+    /* Lueur bleue (au lieu d'orange) */
+    text-shadow: 0 0 8px rgba(0, 198, 255, 0.5); 
 }
 
 /* --- Conteneur Principal --- */
@@ -83,39 +73,38 @@ header h2 {
     text-align: center;
     font-size: 2rem;
     margin-bottom: 40px;
-    color: #ffd700;
+    color: #00c6ff; /* Bleu clair */
     text-transform: uppercase;
     letter-spacing: 2px;
 }
 
-/* --- Section des Jeux (Flexbox) --- */
+/* --- Section des Jeux --- */
 .landing-games {
     display: flex;
     justify-content: center;
     gap: 40px;
-    flex-wrap: wrap; /* Pour que ça passe sur mobile */
+    flex-wrap: wrap;
     padding-bottom: 50px;
 }
 
-/* --- Styles Communs aux Cartes (Blindtest & Petit-bac) --- */
+/* --- Styles Communs aux Cartes --- */
 .blindtest, .petit-bac {
-    background: rgba(255, 255, 255, 0.05); /* Fond semi-transparent */
-    border: 2px solid transparent; /* Bordure transparente pour le dégradé */
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid transparent;
     border-radius: 20px;
     padding: 30px;
     width: 350px;
     backdrop-filter: blur(10px);
     
-    /* Bordure dégradée Orange/Jaune */
-    background-image: linear-gradient(#1a1a1a, #1a1a1a), 
-                      linear-gradient(135deg, #ff8c00, #ffd700);
+    /* Bordure dégradée Bleu Foncé / Bleu Clair */
+    background-image: linear-gradient(#121212, #121212), 
+                      linear-gradient(135deg, #0072ff, #00c6ff);
     background-origin: border-box;
     background-clip: content-box, border-box;
     
-    /* Ombre portée initiale douce (Lueur) */
-    box-shadow: 0 0 15px rgba(255, 140, 0, 0.2);
+    /* Ombre portée bleue douce */
+    box-shadow: 0 0 15px rgba(0, 114, 255, 0.2);
     
-    /* Transition fluide pour le scale et le shadow */
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
                 box-shadow 0.4s ease;
     cursor: pointer;
@@ -123,12 +112,12 @@ header h2 {
 
 /* Titres des cartes */
 .blindtest h4, .petit-bac h4 {
-    color: #ffd700;
+    color: #00c6ff; /* Bleu clair */
     font-size: 1.5rem;
     margin-top: 0;
     text-align: center;
-    text-shadow: 0 0 5px #ff8c00;
-    border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+    text-shadow: 0 0 5px #0072ff;
+    border-bottom: 1px solid rgba(0, 198, 255, 0.3);
     padding-bottom: 15px;
 }
 
@@ -146,26 +135,25 @@ ul li {
     color: #e0e0e0;
 }
 
-/* Puces personnalisées en orange */
+/* Puces personnalisées en bleu clair */
 ul li::before {
     content: "►";
-    color: #ff8c00;
+    color: #00c6ff;
     position: absolute;
     left: 0;
     font-size: 0.8rem;
     top: 3px;
 }
 
-/* --- HOVER EFFECTS (La demande spécifique) --- */
+/* --- HOVER EFFECTS --- */
 .blindtest:hover, .petit-bac:hover {
-    /* Scale demandé */
     transform: scale(1.05);
     
-    /* Brillance intensifiée au survol */
-    box-shadow: 0 0 30px rgba(255, 140, 0, 0.6), 
-                0 0 60px rgba(255, 215, 0, 0.4);
+    /* Brillance bleue intense au survol */
+    box-shadow: 0 0 30px rgba(0, 114, 255, 0.6), 
+                0 0 60px rgba(0, 198, 255, 0.4);
     
-    /* Changement de couleur de fond léger */
-    background-image: linear-gradient(#252525, #252525), 
-                      linear-gradient(135deg, #ffd700, #ff4500);
+    /* Le dégradé change légèrement pour un bleu plus profond */
+    background-image: linear-gradient(#1a1f2b, #1a1f2b), 
+                      linear-gradient(135deg, #00c6ff, #0052d4);
 }
