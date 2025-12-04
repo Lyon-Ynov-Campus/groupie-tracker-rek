@@ -33,7 +33,7 @@ body {
     -webkit-text-fill-color: transparent;
     font-size: 26px;
     font-weight: 700;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     letter-spacing: 1px;
 }
 
@@ -42,7 +42,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 18px;
-    margin-top: 25px;
+    margin-top: 15px;
 }
 
 .register-form label, .authentification-form label {
@@ -142,4 +142,18 @@ body {
 @keyframes slideIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+.form-logo {
+    width: 120px;
+    height: auto;
+    display: block;
+    margin: 0 auto 20px;
+    filter: drop-shadow(0 0 14px rgba(59, 130, 246, 0.55));
+    animation: logoFloat 4.5s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
 }
