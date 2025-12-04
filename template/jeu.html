@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Jeu en cours</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<center>
+    <h1>🎮 Partie en cours - Salle {{.Code}}</h1>
+    <p>Joueur: <strong>{{.Player}}</strong></p>
+
+    <div style="margin-top: 50px; padding: 30px; border: 2px dashed gray; background-color: #f0f0f0;">
+        <h2>Le jeu va bientôt commencer...</h2>
+        <p style="font-size: 18px;">Cette page est en construction</p>
+        <p>Tous les joueurs sont prêts !</p>
+    </div>
+
+    <hr style="margin: 40px 0; width: 80%;">
+
+    <div style="margin-top: 30px;">
+        <h2>Joueurs dans la partie</h2>
+        <ul>
+        {{range .Players}}
+            <li>{{.}}</li>
+        {{end}}
+        </ul>
+    </div>
+
+    <hr style="margin: 40px 0; width: 80%;">
+
+    <div style="margin-top: 30px;">
+        <h2>Scores actuels</h2>
+        <table border="1" style="margin: 0 auto; width: 60%;">
+            <tr>
+                <th>Joueur</th>
+                <th>Score</th>
+            </tr>
+            {{range .Players}}
+            <tr>
+                <td>{{.}}</td>
+                <td>{{index $.Scores .}}</td>
+            </tr>
+            {{end}}
+        </table>
+    </div>
+
+    <div style="margin-top: 40px;">
+        <a href="/salle?code={{.Code}}&player={{.Player}}">
+            <button>Retour au lobby</button>
+        </a>
+    </div>
+</center>
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Salle de Jeu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<center>
+    <h1>🎮 Salle de Jeu - {{.Code}}</h1>
+    <p>Joueurs connectés : {{len .Players}} / {{.MaxPlayers}}</p>
+
+    <div style="margin-top: 20px;">
+        <h2>Participants</h2>
+        <ul>
+        {{range .Players}}
+            <li>{{.}} {{if eq . $.Admin}}<strong style="color: red;">(admin)</strong>{{end}} {{range $.Prets}}{{if eq . $}}  <span style="color: green; font-weight: bold;">[PRET]</span>{{end}}{{end}}</li>
+        {{else}}
+            <li>Aucun participant</li>
+        {{end}}
+        </ul>
+        <form action="/salle/pret" method="post">
+            <input type="hidden" name="code" value="{{.Code}}">
+            <input type="hidden" name="player" value="{{.Player}}">
+            <button type="submit">Je suis prêt !</button>
+        </form>
+    </div>
+
+    <hr style="margin: 30px 0; width: 80%;">
+
+    <div style="margin-top: 20px;">
+        <h2>Scoreboard - Partie en cours</h2>
+        <table border="1" style="width: 100%; text-align: center;">
+            <tr>
+                <th>Joueur</th>
+                <th>Score</th>
+            </tr>
+            {{range .Players}}
+            <tr>
+                <td>{{.}}</td>
+                <td>{{index $.Scores .}}</td>
+            </tr>
+            {{end}}
+        </table>
+    </div>
+
+    <hr style="margin: 30px 0; width: 80%;">
+
+    <div style="margin-top: 20px;">
+        <h2>Classement Général</h2>
+        <table border="1" style="width: 100%; text-align: center;">
+            <tr>
+                <th>Joueur</th>
+                <th>Score Total</th>
+            </tr>
+            {{range $joueur, $score := .ScoresGeneral}}
+            <tr>
+                <td>{{$joueur}}</td>
+                <td>{{$score}}</td>
+            </tr>
+            {{end}}
+        </table>
+    </div>
+
+    <hr style="margin: 30px 0; width: 80%;">
+
+    <div style="margin-top: 20px;">
+        <h2>Discussion</h2>
+        <div style="border: 1px solid black; padding: 10px; height: 200px; overflow: scroll; background-color: white;">
+            {{range .Messages}}
+            <p><strong>{{.Author}}:</strong> {{.Text}}</p>
+            {{else}}
+            <p>Aucun message</p>
+            {{end}}
+        </div>
+        <form action="/salle/message" method="post" style="margin-top: 10px;">
+            <input type="hidden" name="code" value="{{.Code}}">
+            <input type="hidden" name="player" value="{{.Player}}">
+            <input type="text" name="message" placeholder="Taper un message..." required style="width: 300px;">
+            <button type="submit">Envoyer</button>
+        </form>
+    </div>
+
+    <hr style="margin: 30px 0; width: 80%;">
+
+    <div style="margin-top: 20px;">
+        <h2>Journal</h2>
+        <div style="border: 1px solid gray; padding: 10px; height: 150px; overflow: scroll; background-color: #f5f5f5;">
+            {{range .Logs}}
+            <p>{{.}}</p>
+            {{else}}
+            <p>Pas de log pour l'instant.</p>
+            {{end}}
+        </div>
+    </div>
+
+    <form action="/salle/leave" method="post" style="margin-top: 20px;">
+        <input type="hidden" name="code" value="{{.Code}}">
+        <input type="hidden" name="player" value="{{.Player}}">
+        <button type="submit">Quitter la salle</button>
+    </form>
+</center>
+
+</body>
+</html>

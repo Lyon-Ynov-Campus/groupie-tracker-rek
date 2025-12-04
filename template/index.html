@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Salles-de-jeu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<center>
+    <h1>Bienvenue dans les Salles de jeu</h1>
+
+    <div style="margin-top: 30px;">
+        <h2>Créer une salle de jeu</h2>
+        <form action="/entrer" method="post">
+            <label>Votre pseudo:</label><br>
+            <input type="text" name="creator_name" required><br><br>
+            <label>Nombre de participants:</label><br>
+            <input type="number" name="max_players" min="2" max="10" value="4" required><br><br>
+            <button type="submit">Créer la salle</button>
+        </form>
+    </div>
+
+    <hr style="margin: 40px 0; width: 60%;">
+
+    <div>
+        <h2>Rejoindre une salle existante</h2>
+        <form action="/rejoindre" method="post">
+            <label>Votre pseudo:</label><br>
+            <input type="text" name="player_name" required><br><br>
+            <label>Code de la salle:</label><br>
+            <input type="text" name="room_code" placeholder="ABCD12" required><br><br>
+            <button type="submit">Rejoindre la salle</button>
+        </form>
+    </div>
+</center>
+
+</body>
+</html>
