@@ -1,0 +1,136 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+    background: radial-gradient(circle at top left, #0f2027, #203a43, #2c5364); /* deep cinematic gradient */
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 1.2s ease-in-out;
+}
+
+/* Container with glassmorphism */
+.register-container, .authentification-container {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    padding: 40px;
+    width: 400px;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    text-align: center;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.register-container:hover, .authentification-container:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+}
+
+/* Titles with gradient text */
+.register-container h1, .authentification-container h1 {
+    background: linear-gradient(90deg, #ff6a00, #ee0979);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+}
+
+/* Form styling */
+.register-form, .authentification-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 25px;
+}
+
+.register-form label, .authentification-form label {
+    font-weight: 600;
+    text-align: left;
+    font-size: 15px;
+    color: #f0f0f0;
+}
+
+.register-form input, .authentification-form input {
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    transition: 0.3s;
+}
+.register-form input:focus, .authentification-form input:focus {
+    background: rgba(255,255,255,0.3);
+    box-shadow: 0 0 10px #ff6a00;
+    outline: none;
+}
+
+/* Buttons with neon glow */
+.register-form button, .authentification-form button {
+    background: linear-gradient(135deg, #ff6a00, #ee0979);
+    color: #fff;
+    font-weight: bold;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.4s;
+    box-shadow: 0 0 12px rgba(238, 9, 121, 0.6);
+}
+.register-form button:hover, .authentification-form button:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 20px rgba(255, 106, 0, 0.9);
+}
+
+/* Links with futuristic underline */
+.login-link a, .switch-register a {
+    color: #ff6a00;
+    text-decoration: none;
+    font-weight: bold;
+    position: relative;
+}
+.login-link a::after, .switch-register a::after {
+    content: '';
+    position: absolute;
+    width: 0%;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background: #ee0979;
+    transition: width 0.3s;
+}
+.login-link a:hover::after, .switch-register a:hover::after {
+    width: 100%;
+}
+
+/* Alerts with subtle animation */
+.alert {
+    margin-top: 15px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 1rem;
+    text-align: left;
+    animation: slideIn 0.6s ease;
+}
+.alert-error {
+    background: rgba(255, 0, 0, 0.15);
+    border: 1px solid #ff4d4d;
+    color: #ffcccc;
+}
+.alert-success {
+    background: rgba(0, 255, 128, 0.15);
+    border: 1px solid #00ff99;
+    color: #ccffe6;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
