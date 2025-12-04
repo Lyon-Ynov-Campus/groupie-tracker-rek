@@ -1,0 +1,117 @@
+/* --- PAGE SCOREBOARD FINAL --- */
+
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    
+    /* C'est ici que se gère la couleur du fond */
+    /* Fond dégradé très sombre (presque noir) qui correspond au thème */
+    background: radial-gradient(circle at center, #1a1f2b 0%, #0a0e14 100%);
+    
+    color: #ffffff;
+    min-height: 100vh;
+}
+
+.finalscoreboard-container {
+    max-width: 800px;
+    margin: 60px auto;
+    padding: 0 20px;
+    text-align: center;
+}
+
+/* Titre principal (Même style que l'accueil) */
+.finalscoreboard-container h1 {
+    font-size: 3rem;
+    margin-bottom: 50px;
+    text-transform: uppercase;
+    background: linear-gradient(to right, #0072ff, #00c6ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(0, 114, 255, 0.6));
+}
+
+/* Carte de Score (Barre horizontale) */
+.scoreboard {
+    /* Fond sombre semi-transparent */
+    background: rgba(255, 255, 255, 0.03);
+    margin-bottom: 20px;
+    padding: 20px 30px;
+    border-radius: 15px;
+    
+    /* Bordure Néon Bleu (Technique du double background) */
+    border: 2px solid transparent;
+    background-image: linear-gradient(#121212, #121212), 
+                      linear-gradient(90deg, #0072ff, #00c6ff);
+    background-origin: border-box;
+    background-clip: content-box, border-box;
+    
+    /* Petite ombre douce */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    
+    /* Animation d'apparition (optionnel) */
+    animation: slideIn 0.5s ease-out forwards;
+}
+
+/* Agencement interne du score */
+.scoreboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.3rem;
+    font-weight: 400;
+}
+
+/* Style du Rang (Place) */
+.rank {
+    color: #00c6ff; /* Bleu cyan */
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0, 198, 255, 0.5);
+}
+
+/* Style du Pseudo */
+.username {
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+/* Bouton Rejouer */
+.replay {
+    display: inline-block;
+    margin-top: 50px;
+    padding: 15px 50px;
+    font-size: 1.2rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #00c6ff;
+    background: transparent;
+    border: 2px solid #00c6ff;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    /* Lueur du bouton */
+    box-shadow: 0 0 10px rgba(0, 198, 255, 0.2);
+}
+
+/* Hover du bouton Rejouer */
+.replay:hover {
+    background: #00c6ff;
+    color: #0a0e14; /* Texte sombre sur fond bleu */
+    box-shadow: 0 0 30px rgba(0, 198, 255, 0.8);
+    transform: scale(1.05);
+}
+
+/* Animation simple pour l'entrée des scores */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
