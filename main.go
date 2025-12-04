@@ -21,6 +21,7 @@ func main() {
 	http.HandleFunc("/connexion", server.ConnexionHandler)
 	http.HandleFunc("/login", server.LoginHandler)
 	http.Handle("/dashboard", server.RequireAuth(http.HandlerFunc(server.LandingPageHandler)))
+	http.Handle("/logout", server.RequireAuth(http.HandlerFunc(server.LogoutHandler)))
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	http.ListenAndServe(":8080", nil)
 	fmt.Println("Serveur démarré sur http://localhost:8080")
