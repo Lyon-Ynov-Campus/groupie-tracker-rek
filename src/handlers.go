@@ -41,7 +41,7 @@ func renderLogin(w http.ResponseWriter, data LoginPageData) {
 	renderTemplate(w, "authentification.html", data)
 }
 
-// le Homehandler(qui est la premiere page de notre application) affiche la page d'inscription avec un bouton qui dirige vers la page de connexion 
+// le Homehandler(qui est la premiere page de notre application) affiche la page d'inscription avec un bouton qui dirige vers la page de connexion
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -116,7 +116,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// maintenant on peut créer l'utilisateur en utilisant la fonction CreateUser de user.go
-	
+
 	if err := CreateUser(pseudo, email, password); err != nil {
 		log.Printf("Erreur création utilisateur : %v", err)
 		data.Error = "Erreur lors de la création du compte."
@@ -149,7 +149,6 @@ func ConnexionHandler(w http.ResponseWriter, r *http.Request) {
 	renderLogin(w, data)
 }
 
-
 // le LoginHandler gère la logique de connexion des utilisateurs une fois qu'ils ont un compte
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -168,7 +167,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Récupérer les valeurs du formulaire en les nettoyant des espaces inutileset stocker dans une structure de données
-	
+
 	user := strings.TrimSpace(r.FormValue("user"))
 	password := r.FormValue("password")
 
@@ -232,8 +231,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 }
 
-// le DashboardHandler gère l'affichage du tableau de bord une fois que l'utilisateur est connecté
+// Affiche le langipage apres une connexion réussie
 
-func DashboardHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./templates/dashboard.html")
+func LandingPageHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Redirect(w, r, "/connexion", http.StatusSeeOther)
+		return
+	}
+	renderTemplate(w, "landingpage.html", nil)
 }

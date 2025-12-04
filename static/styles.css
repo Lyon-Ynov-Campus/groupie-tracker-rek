@@ -91,6 +91,9 @@ body {
     color: #3b82f6;
 }
 
+.switch-register {
+    color: #3b82f6;
+}
 .login-link a, .switch-register a {
     color: #3b82f6;
     text-decoration: none;
