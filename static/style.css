@@ -1,0 +1,159 @@
+/* --- Configuration Globale --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    /* Fond sombre : j'ai légèrement bleuté le fond noir pour harmoniser */
+    background: radial-gradient(circle at center, #1a1f2b 0%, #0a0e14 100%);
+    color: #ffffff;
+    min-height: 100vh;
+}
+
+/* --- Logo DJ --- */
+.logo {
+    width: 180px;
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+    
+    /* Lueur Bleue autour du logo */
+    filter: drop-shadow(0 0 15px rgba(0, 114, 255, 0.5));
+    
+    animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+/* --- Header --- */
+header {
+    text-align: center;
+    padding: 0 20px 0 20px;
+}
+
+header h1 {
+    font-size: 3.5rem;
+    margin: 0;
+    text-transform: uppercase;
+    /* Dégradé Bleu Foncé vers Bleu Clair */
+    background: linear-gradient(to right, #0072ff, #00c6ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    /* Effet de brillance bleu */
+    filter: drop-shadow(0 0 10px rgba(0, 114, 255, 0.6));
+}
+
+header h2 {
+    font-weight: 400;
+    /* Couleur BLANCHE (conservée) */
+    color: #ffffff; 
+    margin-top: 5px;
+    margin-bottom: 10px; 
+    font-size: 1.4rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    /* Lueur bleue (au lieu d'orange) */
+    text-shadow: 0 0 8px rgba(0, 198, 255, 0.5); 
+}
+
+/* --- Conteneur Principal --- */
+.landing-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.landing-title h3 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 40px;
+    color: #00c6ff; /* Bleu clair */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* --- Section des Jeux --- */
+.landing-games {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    padding-bottom: 50px;
+}
+
+/* --- Styles Communs aux Cartes --- */
+.blindtest, .petit-bac {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid transparent;
+    border-radius: 20px;
+    padding: 30px;
+    width: 350px;
+    backdrop-filter: blur(10px);
+    
+    /* Bordure dégradée Bleu Foncé / Bleu Clair */
+    background-image: linear-gradient(#121212, #121212), 
+                      linear-gradient(135deg, #0072ff, #00c6ff);
+    background-origin: border-box;
+    background-clip: content-box, border-box;
+    
+    /* Ombre portée bleue douce */
+    box-shadow: 0 0 15px rgba(0, 114, 255, 0.2);
+    
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                box-shadow 0.4s ease;
+    cursor: pointer;
+}
+
+/* Titres des cartes */
+.blindtest h4, .petit-bac h4 {
+    color: #00c6ff; /* Bleu clair */
+    font-size: 1.5rem;
+    margin-top: 0;
+    text-align: center;
+    text-shadow: 0 0 5px #0072ff;
+    border-bottom: 1px solid rgba(0, 198, 255, 0.3);
+    padding-bottom: 15px;
+}
+
+/* Listes */
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    margin-bottom: 12px;
+    position: relative;
+    padding-left: 25px;
+    line-height: 1.5;
+    color: #e0e0e0;
+}
+
+/* Puces personnalisées en bleu clair */
+ul li::before {
+    content: "►";
+    color: #00c6ff;
+    position: absolute;
+    left: 0;
+    font-size: 0.8rem;
+    top: 3px;
+}
+
+/* --- HOVER EFFECTS --- */
+.blindtest:hover, .petit-bac:hover {
+    transform: scale(1.05);
+    
+    /* Brillance bleue intense au survol */
+    box-shadow: 0 0 30px rgba(0, 114, 255, 0.6), 
+                0 0 60px rgba(0, 198, 255, 0.4);
+    
+    /* Le dégradé change légèrement pour un bleu plus profond */
+    background-image: linear-gradient(#1a1f2b, #1a1f2b), 
+                      linear-gradient(135deg, #00c6ff, #0052d4);
+}
