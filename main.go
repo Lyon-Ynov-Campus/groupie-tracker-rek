@@ -23,10 +23,23 @@ var counter int
 var prets = make(map[string][]string)
 var scoresPartie = make(map[string]map[string]int)
 var scoresGeneral = make(map[string]int)
+var categories = make(map[string][]string)
+var tempsReponse = make(map[string]int)
+var nombreManches = make(map[string]int)
 
 type Message struct {
 	Author string
 	Text   string
+}
+
+type Categorie struct {
+	Nom string
+}
+
+type ConfigJeu struct {
+	Categories []string
+	Temps      int
+	Manches    int
 }
 
 func main() {
@@ -40,6 +53,8 @@ func main() {
 	http.HandleFunc("/salle/message", messageHandler)
 	http.HandleFunc("/salle/leave", leaveHandler)
 	http.HandleFunc("/jeu", jeuHandler)
+	http.HandleFunc("/salle/categorie/ajouter", ajouterCategorieHandler)
+	http.HandleFunc("/salle/categorie/supprimer", supprimerCategorieHandler)
 	http.HandleFunc("/style.css", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "template/style.css")
 	})
@@ -84,6 +99,53 @@ func entrerHandler(w http.ResponseWriter, r *http.Request) {
 	if maxPlayersInt < 2 {
 		maxPlayersInt = 4
 	}
+
+	var categoriesStr string
+	categoriesStr = r.FormValue("categories")
+	var categoriesListe []string
+	categoriesListe = []string{}
+	if categoriesStr != "" {
+		var catsSplit []string
+		catsSplit = strings.Split(categoriesStr, ",")
+		var i int
+		i = 0
+		for i < len(catsSplit) {
+			var cat string
+			cat = strings.TrimSpace(catsSplit[i])
+			if cat != "" {
+				categoriesListe = append(categoriesListe, cat)
+			}
+			i = i + 1
+		}
+	}
+	if len(categoriesListe) == 0 {
+		categoriesListe = append(categoriesListe, "Generale")
+	}
+
+	var tempsStr string
+	tempsStr = r.FormValue("temps")
+	var tempsInt int
+	var err2 error
+	tempsInt, err2 = strconv.Atoi(tempsStr)
+	if err2 != nil {
+		tempsInt = 30
+	}
+	if tempsInt < 10 {
+		tempsInt = 30
+	}
+
+	var manchesStr string
+	manchesStr = r.FormValue("manches")
+	var manchesInt int
+	var err3 error
+	manchesInt, err3 = strconv.Atoi(manchesStr)
+	if err3 != nil {
+		manchesInt = 5
+	}
+	if manchesInt < 1 {
+		manchesInt = 5
+	}
+
 	var code string
 	code = generateCode()
 	mu.Lock()
@@ -103,6 +165,9 @@ func entrerHandler(w http.ResponseWriter, r *http.Request) {
 	var mapScores map[string]int
 	mapScores = make(map[string]int)
 	scoresPartie[code] = mapScores
+	categories[code] = categoriesListe
+	tempsReponse[code] = tempsInt
+	nombreManches[code] = manchesInt
 	mu.Unlock()
 	var url string
 	url = "/salle?code=" + code + "&player=" + creator
@@ -200,6 +265,12 @@ func salleHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var scoresJoueurs map[string]int
 	scoresJoueurs = scoresPartie[code]
+	var listeCategories []string
+	listeCategories = categories[code]
+	var tempsInt int
+	tempsInt = tempsReponse[code]
+	var manchesInt int
+	manchesInt = nombreManches[code]
 	mu.RUnlock()
 	type DataSalle struct {
 		Code          string
@@ -212,6 +283,9 @@ func salleHandler(w http.ResponseWriter, r *http.Request) {
 		Prets         []string
 		Scores        map[string]int
 		ScoresGeneral map[string]int
+		Categories    []string
+		Temps         int
+		Manches       int
 	}
 	var data DataSalle
 	data.Code = code
@@ -224,6 +298,9 @@ func salleHandler(w http.ResponseWriter, r *http.Request) {
 	data.Prets = listePrets
 	data.Scores = scoresJoueurs
 	data.ScoresGeneral = scoresGeneral
+	data.Categories = listeCategories
+	data.Temps = tempsInt
+	data.Manches = manchesInt
 	var nombreJoueurs int
 	nombreJoueurs = len(listeJoueurs)
 	if nombreJoueurs > 0 {
@@ -425,4 +502,100 @@ func jeuHandler(w http.ResponseWriter, r *http.Request) {
 	data.Players = listeJoueurs
 	data.Scores = scoresJoueurs
 	tmpl.ExecuteTemplate(w, "jeu.html", data)
+}
+
+func ajouterCategorieHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	var code string
+	code = r.FormValue("code")
+	var player string
+	player = r.FormValue("player")
+	var nouvelleCategorie string
+	nouvelleCategorie = r.FormValue("nouvelle_categorie")
+	nouvelleCategorie = strings.TrimSpace(nouvelleCategorie)
+
+	mu.Lock()
+	var listeJoueurs []string
+	listeJoueurs = joueurs[code]
+	var admin string
+	admin = ""
+	if len(listeJoueurs) > 0 {
+		admin = listeJoueurs[0]
+	}
+	var estAdmin bool
+	estAdmin = false
+	if player == admin {
+		estAdmin = true
+	}
+	if estAdmin == true {
+		if nouvelleCategorie != "" {
+			var listeCategories []string
+			listeCategories = categories[code]
+			listeCategories = append(listeCategories, nouvelleCategorie)
+			categories[code] = listeCategories
+			var logMessage string
+			logMessage = "Catégorie ajoutée: " + nouvelleCategorie
+			logs[code] = append(logs[code], logMessage)
+		}
+	}
+	mu.Unlock()
+
+	var urlRedirect string
+	urlRedirect = "/salle?code=" + code + "&player=" + player
+	http.Redirect(w, r, urlRedirect, http.StatusSeeOther)
+}
+
+func supprimerCategorieHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	var code string
+	code = r.FormValue("code")
+	var player string
+	player = r.FormValue("player")
+	var categorieASupprimer string
+	categorieASupprimer = r.FormValue("categorie")
+
+	mu.Lock()
+	var listeJoueurs []string
+	listeJoueurs = joueurs[code]
+	var admin string
+	admin = ""
+	if len(listeJoueurs) > 0 {
+		admin = listeJoueurs[0]
+	}
+	var estAdmin bool
+	estAdmin = false
+	if player == admin {
+		estAdmin = true
+	}
+	if estAdmin == true {
+		var listeCategories []string
+		listeCategories = categories[code]
+		var nouvelleListeCategories []string
+		nouvelleListeCategories = []string{}
+		var i int
+		i = 0
+		for i < len(listeCategories) {
+			var cat string
+			cat = listeCategories[i]
+			if cat != categorieASupprimer {
+				nouvelleListeCategories = append(nouvelleListeCategories, cat)
+			}
+			i = i + 1
+		}
+		categories[code] = nouvelleListeCategories
+		var logMessage string
+		logMessage = "Catégorie supprimée: " + categorieASupprimer
+		logs[code] = append(logs[code], logMessage)
+	}
+	mu.Unlock()
+
+	var urlRedirect string
+	urlRedirect = "/salle?code=" + code + "&player=" + player
+	http.Redirect(w, r, urlRedirect, http.StatusSeeOther)
 }
