@@ -8,47 +8,52 @@
 <body>
 
 <center>
-    <h1>🎮 Partie en cours - Salle {{.Code}}</h1>
-    <p>Joueur: <strong>{{.Player}}</strong></p>
-
-    <div style="margin-top: 50px; padding: 30px; border: 2px dashed gray; background-color: #f0f0f0;">
-        <h2>Le jeu va bientôt commencer...</h2>
-        <p style="font-size: 18px;">Cette page est en construction</p>
-        <p>Tous les joueurs sont prêts !</p>
+    <h1>Partie en cours - Salle {{.Code}}</h1>
+    <div style="background: rgba(59, 130, 246, 0.15); padding: 12px; border-radius: 10px; display: inline-block; margin-bottom: 25px;">
+        <p style="margin: 5px;">Joueur: <strong style="color: #3b82f6;">{{.Player}}</strong></p>
     </div>
 
-    <hr style="margin: 40px 0; width: 80%;">
+    <div style="margin-top: 50px; padding: 40px; border: 3px dashed rgba(59, 130, 246, 0.4); background: rgba(59, 130, 246, 0.08); border-radius: 20px; max-width: 500px; margin-left: auto; margin-right: auto;">
+        <h2 style="font-size: 24px;">Le jeu va bientôt commencer...</h2>
+        <p style="font-size: 18px; color: #60a5fa; margin: 15px 0;">Cette page est en construction</p>
+        <p style="color: #10b981; font-weight: bold;">Tous les joueurs sont prêts !</p>
+        <div style="margin-top: 25px; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 10px;">
+            <p style="font-size: 14px; color: #94a3b8;">En attendant, préparez-vous pour la partie...</p>
+        </div>
+    </div>
 
-    <div style="margin-top: 30px;">
+    <hr style="margin: 45px 0; width: 80%;">
+
+    <div style="margin-top: 35px;">
         <h2>Joueurs dans la partie</h2>
-        <ul>
+        <ul style="max-width: 400px; margin: 20px auto; background: rgba(59, 130, 246, 0.08); padding: 20px; border-radius: 12px;">
         {{range .Players}}
-            <li>{{.}}</li>
+            <li style="text-align: left; font-size: 16px;">{{.}}</li>
         {{end}}
         </ul>
     </div>
 
-    <hr style="margin: 40px 0; width: 80%;">
+    <hr style="margin: 45px 0; width: 80%;">
 
-    <div style="margin-top: 30px;">
+    <div style="margin-top: 35px;">
         <h2>Scores actuels</h2>
-        <table border="1" style="margin: 0 auto; width: 60%;">
+        <table style="margin: 20px auto; max-width: 450px;">
             <tr>
-                <th>Joueur</th>
-                <th>Score</th>
+                <th style="width: 70%;">Joueur</th>
+                <th style="width: 30%;">Score</th>
             </tr>
             {{range .Players}}
             <tr>
                 <td>{{.}}</td>
-                <td>{{index $.Scores .}}</td>
+                <td style="font-weight: bold; color: #3b82f6;">{{index $.Scores .}}</td>
             </tr>
             {{end}}
         </table>
     </div>
 
-    <div style="margin-top: 40px;">
-        <a href="/salle?code={{.Code}}&player={{.Player}}">
-            <button>Retour au lobby</button>
+    <div style="margin-top: 45px;">
+        <a href="/salle?code={{.Code}}&player={{.Player}}" style="text-decoration: none;">
+            <button style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 16px 32px;">Retour au lobby</button>
         </a>
     </div>
 </center>

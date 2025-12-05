@@ -9,28 +9,37 @@
 
 <center>
     <h1>Bienvenue dans les Salles de jeu</h1>
+    <p style="font-size: 16px; margin-top: -5px;">Créez ou rejoignez une partie multijoueur</p>
 
-    <div style="margin-top: 30px;">
-        <h2>Créer une salle de jeu</h2>
+    <div style="margin-top: 40px; background: rgba(59, 130, 246, 0.08); padding: 25px; border-radius: 15px; border: 1px solid rgba(59, 130, 246, 0.3);">
+        <h2>Créer une nouvelle salle</h2>
         <form action="/entrer" method="post">
-            <label>Votre pseudo:</label><br>
-            <input type="text" name="creator_name" required><br><br>
-            <label>Nombre de participants:</label><br>
-            <input type="number" name="max_players" min="2" max="10" value="4" required><br><br>
-            <button type="submit">Créer la salle</button>
+            <div style="margin: 15px 0;">
+                <label>Votre pseudo:</label><br>
+                <input type="text" name="creator_name" placeholder="Ex: Joueur123" required><br>
+            </div>
+            <div style="margin: 15px 0;">
+                <label>Nombre de participants:</label><br>
+                <input type="number" name="max_players" min="2" max="10" value="4" required><br>
+            </div>
+            <button type="submit" style="margin-top: 10px;">Créer la salle</button>
         </form>
     </div>
 
-    <hr style="margin: 40px 0; width: 60%;">
+    <hr style="margin: 40px 0; width: 70%;">
 
-    <div>
+    <div style="background: rgba(59, 130, 246, 0.08); padding: 25px; border-radius: 15px; border: 1px solid rgba(59, 130, 246, 0.3);">
         <h2>Rejoindre une salle existante</h2>
         <form action="/rejoindre" method="post">
-            <label>Votre pseudo:</label><br>
-            <input type="text" name="player_name" required><br><br>
-            <label>Code de la salle:</label><br>
-            <input type="text" name="room_code" placeholder="ABCD12" required><br><br>
-            <button type="submit">Rejoindre la salle</button>
+            <div style="margin: 15px 0;">
+                <label>Votre pseudo:</label><br>
+                <input type="text" name="player_name" placeholder="Ex: Joueur456" required><br>
+            </div>
+            <div style="margin: 15px 0;">
+                <label>Code de la salle:</label><br>
+                <input type="text" name="room_code" placeholder="ABCD12" style="text-transform: uppercase;" required><br>
+            </div>
+            <button type="submit" style="margin-top: 10px;">Rejoindre</button>
         </form>
     </div>
 </center>
