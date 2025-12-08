@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Salle de Jeu</title>
+    <link rel="stylesheet" href="/static/init_salle.css">
+</head>
+<body>
+
+<center>
+    <h1>Salle de Jeu - {{.Code}}</h1>
+    <div style="background: rgba(59, 130, 246, 0.15); padding: 12px; border-radius: 10px; display: inline-block; margin-bottom: 20px;">
+        <p style="margin: 5px;">Joueurs connectés : <strong>{{len .Players}}</strong> / <strong>{{.MaxPlayers}}</strong></p>
+    </div>
+
+    <div style="margin-top: 25px; background: rgba(59, 130, 246, 0.08); padding: 20px; border-radius: 15px;">
+        <h2>Participants</h2>
+        <ul style="max-width: 400px; margin: 0 auto;">
+        {{range .Players}}
+            <li style="text-align: left;">{{.}} {{if eq . $.Admin}}<strong style="color: #f59e0b;">(admin)</strong>{{end}} {{range $.Prets}}{{if eq . $}}<span style="color: #10b981; font-weight: bold;">[PRET]</span>{{end}}{{end}}</li>
+        {{else}}
+            <li>Aucun participant</li>
+        {{end}}
+        </ul>
+        <form action="/salle/pret" method="post" style="margin-top: 20px;">
+            <input type="hidden" name="code" value="{{.Code}}">
+            <input type="hidden" name="player" value="{{.Player}}">
+            <button type="submit">Je suis prêt !</button>
+        </form>
+    </div>
+
+    <hr style="margin: 35px 0; width: 85%;">
+
+    <div style="margin-top: 25px; background: rgba(245, 158, 11, 0.08); padding: 20px; border-radius: 15px;">
+        <h2>Paramètres de la partie</h2>
+        <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 10px; max-width: 600px; margin: 0 auto;">
+            <p style="margin: 8px 0;"><strong style="color: #60a5fa;">Temps par manche:</strong> <span style="color: #10b981;">{{.Temps}} secondes</span></p>
+            <p style="margin: 8px 0;"><strong style="color: #60a5fa;">Nombre de manches:</strong> <span style="color: #10b981;">{{.Manches}}</span></p>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <h3>Catégories:</h3>
+            <ul style="max-width: 500px; margin: 10px auto; list-style: none; padding: 0;">
+            {{range .Categories}}
+                <li style="background: rgba(59, 130, 246, 0.2); padding: 8px; margin: 5px; border-radius: 8px; display: inline-block;">
+                    {{.}}
+                    {{if eq $.Player $.Admin}}
+                    <form action="/salle/categories/supprimer" method="post" style="display: inline;">
+                        <input type="hidden" name="code" value="{{$.Code}}">
+                        <input type="hidden" name="player" value="{{$.Player}}">
+                        <input type="hidden" name="categorie" value="{{.}}">
+                        <button type="submit" style="background: #ef4444; padding: 2px 8px; font-size: 12px; margin-left: 5px;">X</button>
+                    </form>
+                    {{end}}
+                </li>
+            {{else}}
+                <li>Aucune catégorie</li>
+            {{end}}
+            </ul>
+            
+            {{if eq .Player .Admin}}
+            <form action="/salle/categories/ajouter" method="post" style="margin-top: 15px;">
+                <input type="hidden" name="code" value="{{.Code}}">
+                <input type="hidden" name="player" value="{{.Player}}">
+                <input type="text" name="nouvelle_categorie" placeholder="Ajouter une catégorie..." style="width: 250px;">
+                <button type="submit">Ajouter</button>
+            </form>
+            {{end}}
+        </div>
+    </div>
+
+    <hr style="margin: 35px 0; width: 85%;">
+
+    <div style="margin-top: 25px;">
+        <h2>Scoreboard - Partie en cours</h2>
+        <table style="margin: 0 auto; max-width: 500px;">
+            <tr>
+                <th style="width: 70%;">Joueur</th>
+                <th style="width: 30%;">Score</th>
+            </tr>
+            {{range .Players}}
+            <tr>
+                <td>{{.}}</td>
+                <td style="font-weight: bold; color: #3b82f6;">{{index $.Scores .}}</td>
+            </tr>
+            {{end}}
+        </table>
+    </div>
+
+    <hr style="margin: 35px 0; width: 85%;">
+
+    <div style="margin-top: 25px;">
+        <h2>Classement Général</h2>
+        <table style="margin: 0 auto; max-width: 500px;">
+            <tr>
+                <th style="width: 70%;">Joueur</th>
+                <th style="width: 30%;">Score Total</th>
+            </tr>
+            {{range $joueur, $score := .ScoresGeneral}}
+            <tr>
+                <td>{{$joueur}}</td>
+                <td style="font-weight: bold; color: #f59e0b;">{{$score}}</td>
+            </tr>
+            {{end}}
+        </table>
+    </div>
+
+    <hr style="margin: 35px 0; width: 85%;">
+
+    <div style="margin-top: 25px;">
+        <h2>Discussion</h2>
+        <div style="border: 2px solid rgba(59, 130, 246, 0.3); padding: 15px; height: 220px; overflow-y: scroll; background: rgba(0, 0, 0, 0.3); border-radius: 10px; text-align: left; max-width: 600px; margin: 0 auto;">
+            {{range .Messages}}
+            <p style="margin: 8px 0;"><strong style="color: #60a5fa;">{{.Author}}:</strong> <span style="color: #e2e8ff;">{{.Text}}</span></p>
+            {{else}}
+            <p style="text-align: center; color: #94a3b8;">Aucun message pour le moment...</p>
+            {{end}}
+        </div>
+        <form action="/salle/message" method="post" style="margin-top: 15px;">
+            <input type="hidden" name="code" value="{{.Code}}">
+            <input type="hidden" name="player" value="{{.Player}}">
+            <input type="text" name="message" placeholder="Taper un message..." required style="width: 400px;">
+            <button type="submit">Envoyer</button>
+        </form>
+    </div>
+
+    <hr style="margin: 35px 0; width: 85%;">
+
+    <div style="margin-top: 25px;">
+        <h2>Journal</h2>
+        <div style="border: 2px solid rgba(99, 155, 255, 0.2); padding: 15px; height: 160px; overflow-y: scroll; background: rgba(0, 0, 0, 0.2); border-radius: 10px; text-align: left; max-width: 600px; margin: 0 auto;">
+            {{range .Logs}}
+            <p style="margin: 6px 0; color: #c7d6f5; font-size: 14px;">- {{.}}</p>
+            {{else}}
+            <p style="text-align: center; color: #94a3b8;">Pas de log pour l'instant.</p>
+            {{end}}
+        </div>
+    </div>
+
+    <form action="/salle/quitter" method="post" style="margin-top: 30px;">
+        <input type="hidden" name="code" value="{{.Code}}">
+        <input type="hidden" name="player" value="{{.Player}}">
+        <button type="submit" style="background: linear-gradient(135deg, #ef4444, #dc2626);">Quitter la salle</button>
+    </form>
+</center>
+
+</body>
+</html>

@@ -266,3 +266,19 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/connexion", http.StatusSeeOther)
 }
+
+func AfficherCreationBlindTestHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		return
+	}
+	renderTemplate(w, "init_salle_blindtest.html", nil)
+}
+
+func AfficherCreationPetitBacHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		return
+	}
+	renderTemplate(w, "init_salle_petitbac.html", nil)
+}	

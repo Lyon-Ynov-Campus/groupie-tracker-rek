@@ -1,0 +1,295 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+    background: radial-gradient(circle at top, #090909, #000000 65%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    animation: fadeIn 1.2s ease-in-out;
+    color: #e2e8ff;
+}
+
+/* Containers */
+.petitbac-wrapper,
+.blindtest-wrapper {
+    width: 100%;
+    max-width: 760px;
+    margin: 40px auto 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* Cards */
+.card {
+    background: rgba(19, 25, 38, 0.92);
+    border-radius: 20px;
+    padding: 32px 36px;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(12px);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(37, 79, 156, 0.28);
+}
+
+.card.intro {
+    text-align: center;
+}
+
+.card h1,
+.card h2 {
+    margin: 0 0 16px;
+    background: linear-gradient(90deg, #1d4ed8, #0f6dec);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.card p {
+    margin: 0;
+    color: #c7d6f5;
+}
+
+/* Forms */
+.form-grid {
+    display: grid;
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+.form-inline label,
+.form-group label,
+.label {
+    font-weight: 600;
+    font-size: 15px;
+    color: #e2e8ff;
+}
+
+.form-inline .row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.form-inline input[type="text"] {
+    flex: 1 1 260px;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="number"] {
+    padding: 12px;
+    border: 1px solid #c7d6f5;
+    border-radius: 10px;
+    font-size: 15px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #1f2d3d;
+    transition: 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus {
+    background: #ffffff;
+    box-shadow: 0 0 10px rgba(61, 115, 230, 0.35);
+    border-color: #3d73e6;
+    outline: none;
+}
+
+/* Buttons */
+button {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    font-weight: 600;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 0 14px rgba(59, 130, 246, 0.35);
+    font-size: 15px;
+}
+
+button:hover {
+    transform: scale(1.04);
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    box-shadow: 0 0 20px rgba(30, 64, 175, 0.45);
+}
+
+button.ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: none;
+    color: #e2e8ff;
+}
+
+button.ghost:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.form-actions {
+    margin-top: 8px;
+}
+
+/* Petit Bac – catégories */
+.category-list {
+    margin: 24px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(59, 130, 246, 0.12);
+    border-radius: 12px;
+    padding: 12px 16px;
+    border: 1px solid rgba(99, 155, 255, 0.3);
+    gap: 16px;
+}
+
+.category-name {
+    font-weight: 600;
+    color: #e2e8ff;
+}
+
+.category-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.category-actions input[type="text"] {
+    width: 160px;
+}
+
+.category-empty {
+    background: rgba(59, 130, 246, 0.08);
+    border-radius: 10px;
+    padding: 14px;
+    border: 1px dashed rgba(99, 155, 255, 0.4);
+    color: #c7d6f5;
+    text-align: center;
+}
+
+/* Petit Bac – sélection de catégories */
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.checkbox-grid li {
+    background: rgba(59, 130, 246, 0.12);
+    border-radius: 10px;
+    padding: 10px 12px;
+    border: 1px solid rgba(99, 155, 255, 0.3);
+}
+
+.checkbox-grid label {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: #e2e8ff;
+    font-weight: 500;
+}
+
+.checkbox-grid input[type="checkbox"] {
+    accent-color: #3b82f6;
+}
+
+/* Blind Test – playlists */
+.radio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-top: 10px;
+}
+
+.radio-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(99, 155, 255, 0.3);
+    background: rgba(59, 130, 246, 0.12);
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.radio-card:hover {
+    border-color: rgba(99, 155, 255, 0.6);
+    background: rgba(59, 130, 246, 0.18);
+}
+
+.radio-card input[type="radio"] {
+    accent-color: #3b82f6;
+}
+
+.radio-card span {
+    font-weight: 600;
+    color: #e2e8ff;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .card {
+        padding: 26px 24px;
+    }
+
+    .category-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .category-actions form {
+        width: 100%;
+    }
+
+    .category-actions input[type="text"] {
+        width: 100%;
+    }
+
+    .form-inline .row {
+        flex-direction: column;
+    }
+
+    button {
+        width: 100%;
+    }
+}
