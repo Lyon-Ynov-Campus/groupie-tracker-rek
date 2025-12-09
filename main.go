@@ -6,6 +6,9 @@ import (
 )
 
 func main() {
+	//charger les credentials spotify
+	InitSpotify()
+
 	var handler1 = indexHandler
 	http.HandleFunc("/", handler1)
 
@@ -24,6 +27,13 @@ func main() {
 
 	var handler6 = classementHandler
 	http.HandleFunc("/classement", handler6)
+
+	//routes spotify
+	var handler7 = spotifyLoginHandler
+	http.HandleFunc("/spotify/login", handler7)
+
+	var handler8 = spotifyCallbackHandler
+	http.HandleFunc("/callback", handler8)
 
 	var staticPath = "/static/"
 	var staticDir = "static"

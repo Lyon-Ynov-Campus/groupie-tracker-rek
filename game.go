@@ -1,10 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
+	"os"
+	"rek/spotify"
 	"time"
 )
 
@@ -25,55 +24,47 @@ type Player struct {
 	LastSubmit time.Time
 }
 
-type SpotifyTrack struct {
-	Name string `json:"name"`
-	URL  string `json:"preview_url"`
-}
-
-type SpotifyResponse struct {
-	Tracks struct {
-		Items []struct {
-			Track SpotifyTrack `json:"track"`
-		} `json:"items"`
-	} `json:"tracks"`
-}
-
 var currentGame *Game
-var token = "BQC8..."
+var tracks []spotify.Track
+var currentTrackIndex int
+
+// recuperer les musiques spotify
+func InitSpotify() {
+	clientID := os.Getenv("SPOTIFY_CLIENT_ID")
+	clientSecret := os.Getenv("SPOTIFY_CLIENT_SECRET")
+
+	spotify.SetCredentials(clientID, clientSecret)
+
+	//verifier si on a un token
+	if !spotify.IsAuthenticated() {
+		fmt.Println("Pas de token Spotify. L'utilisateur doit se connecter.")
+		return
+	}
+
+	//recuperer playlist rock par defaut
+	tracks, err := spotify.GetPlaylistTracksByGenre("Rock")
+	if err != nil {
+		fmt.Println("Erreur tracks:", err)
+		return
+	}
+
+	fmt.Printf("Chargé %d musiques Spotify\n", len(tracks))
+	currentTrackIndex = 0
+}
 
 func GetSpotifySong() (string, string, string) {
-	var url = "https://api.spotify.com/v1/playlists/37i9dQZF1DXcBWIGoYBM5M/tracks?limit=50"
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return "song1.mp3", "Bohemian Rhapsody", ""
-	}
-	req.Header.Add("Authorization", "Bearer "+token)
-
-	var client = &http.Client{}
-	resp, err2 := client.Do(req)
-	if err2 != nil {
-		fmt.Println("erreur")
-		return "song1.mp3", "Bohemian Rhapsody", ""
-	}
-	defer resp.Body.Close()
-
-	body, _ := ioutil.ReadAll(resp.Body)
-	var data SpotifyResponse
-	err3 := json.Unmarshal(body, &data)
-	if err3 != nil {
+	if len(tracks) == 0 {
 		return "song1.mp3", "Test", ""
 	}
 
-	var nbItems = len(data.Tracks.Items)
-	if nbItems > 0 {
-		var idx = time.Now().Second()
-		var index = idx % nbItems
-		var track = data.Tracks.Items[index].Track
-		var songname = track.Name + ".mp3"
-		return songname, track.Name, track.URL
+	//prendre la musique suivante
+	track := tracks[currentTrackIndex]
+	currentTrackIndex++
+	if currentTrackIndex >= len(tracks) {
+		currentTrackIndex = 0
 	}
 
-	return "song1.mp3", "Test", ""
+	return track.Name + ".mp3", track.Name, track.PreviewURL
 }
 
 func NewGame() *Game {
