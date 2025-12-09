@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>🎵 Blind Test Musical - Jeu 🎵</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <meta http-equiv="refresh" content="35">
+    <style>
+        .music-icon {
+            display: inline-block;
+            animation: rotate 2s linear infinite;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .pulse {
+            animation: pulse-anim 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-anim {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <center>
+    <div class="header">
+        <h1><span class="music-icon">🎵</span> Find The Beat <span class="music-icon">🎵</span></h1>
+        <p>🎮 Manche Numéro <strong>#{{.RoundNumber}}</strong> 🎮</p>
+        <br>
+        <p style="font-size: 0.9em; color: rgba(255,255,255,0.8);">⚡ Répondez vite pour gagner plus de points ! ⚡</p>
+    </div>
+    </center>
+    
+    <div class="game-container">
+        {{if .IsActive}}
+        <div class="audio-section">
+            <h2>🎧 Écoutez bien la musique 🎧</h2>
+            <p style="color: #666; font-style: italic; margin-bottom: 15px;">Attention, soyez rapide !</p>
+            <br>
+            <audio controls autoplay>
+                <source src="{{.SpotifyURL}}" type="audio/mpeg">
+                <source src="/music/{{.CurrentSong}}" type="audio/mpeg">
+                Votre navigateur ne peut pas lire l'audio
+            </audio>
+            <br>
+            <br>
+            <p style="font-size: 0.85em; color: #999;">💡 Astuce : Plus vous répondez vite, plus vous gagnez de points !</p>
+        </div>
+        
+        <br>
+        <div class="timer">
+            <p class="pulse">⏱️ Temps restant : <strong id="timer-display">{{.TimeLeft}}</strong> secondes ⏱️</p>
+        </div>
+        <br>
+        
+        <div class="form-section">
+            <h3>🎤 Quel est le titre de cette chanson ? 🎤</h3>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">Remplissez le formulaire ci-dessous</p>
+            <form method="POST" action="/submit">
+                <div>
+                    <label for="player" style="display: block; text-align: left; margin-bottom: 5px; color: #333; font-weight: 600;">👤 Votre nom :</label>
+                    <input type="text" id="player" name="player" placeholder="Entrez votre nom..." required>
+                </div>
+                <br>
+                <div>
+                    <label for="answer" style="display: block; text-align: left; margin-bottom: 5px; color: #333; font-weight: 600;">🎵 Titre de la chanson :</label>
+                    <input type="text" id="answer" name="answer" placeholder="Entrez le titre..." required>
+                </div>
+                <br>
+                <button type="submit">✅ Valider ma réponse ✅</button>
+                <p style="text-align: center; font-size: 0.8em; color: #999; margin-top: 10px;">Appuyez sur Entrée pour valider rapidement</p>
+            </form>
+        </div>
+        {{else}}
+        <div class="round-ended">
+            <h2>🏁 Manche terminée ! 🏁</h2>
+            <br>
+            <p>⏳ Préparation d'une nouvelle manche...</p>
+            <br>
+            <p style="font-size: 0.9em; color: #999;">La page va se recharger automatiquement</p>
+        </div>
+        {{end}}
+    </div>
+    
+    <br><br>
+    <div class="scores-section">
+        <h2>🏆 Classement des Joueurs 🏆</h2>
+        <p style="text-align: center; color: #666; margin-bottom: 15px; font-style: italic;">Les scores sont mis à jour en temps réel</p>
+        <iframe src="/scores" width="100%" height="350" frameborder="0" style="border-radius: 10px;"></iframe>
+    </div>
+    
+    <br>
+    <div class="footer">
+        <a href="/config">⚙️ Configuration du Jeu ⚙️</a>
+    </div>
+    <br>
+    <center>
+    <p style="color: rgba(255,255,255,0.7); font-size: 0.85em;">Développé avec ❤️ en Go</p>
+    </center>
+    <script>
+        var timeLeft = {{.TimeLeft}};
+        var isActive = {{.IsActive}};
+        
+        function updateTimer() {
+            if (isActive && timeLeft > 0) {
+                timeLeft = timeLeft - 1;
+                var timerElement = document.getElementById("timer-display");
+                if (timerElement) {
+                    timerElement.innerHTML = timeLeft;
+                }
+                
+                if (timeLeft <= 0) {
+                    window.location.href = "/classement";
+                }
+            }
+        }
+        
+        setInterval(updateTimer, 1000);
+    </script>
+</body>
+</html>

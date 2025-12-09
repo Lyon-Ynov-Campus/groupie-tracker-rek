@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Scores</title>
+    <meta http-equiv="refresh" content="2">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body { 
+            margin: 0; 
+            padding: 15px; 
+            background: transparent; 
+            font-family: 'Poppins', sans-serif;
+        }
+        table {
+            width: 100%;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .medal {
+            font-size: 1.5em;
+            margin-right: 5px;
+        }
+        .score-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    {{if .Players}}
+    <table class="scores-table" border="1" cellpadding="0" cellspacing="0">
+        <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <th style="text-align: center; width: 60px;">🏅 Rang</th>
+            <th>👤 Nom du Joueur</th>
+            <th style="text-align: center; width: 120px;">🎯 Score</th>
+        </tr>
+        {{range $index, $player := .Players}}
+        <tr>
+            <td style="text-align: center; font-weight: bold;">
+                {{if eq $index 0}}<span class="medal">🥇</span>{{end}}
+                {{if eq $index 1}}<span class="medal">🥈</span>{{end}}
+                {{if eq $index 2}}<span class="medal">🥉</span>{{end}}
+                {{add $index 1}}
+            </td>
+            <td style="font-weight: 600; font-size: 1.05em;">{{$player.Name}}</td>
+            <td style="text-align: center;">
+                <span class="score-badge">{{$player.Score}} pts</span>
+            </td>
+        </tr>
+        {{end}}
+    </table>
+    <br>
+    <center>
+    <p style="color: #999; font-size: 0.85em; font-style: italic;">⚡ Mise à jour automatique toutes les 2 secondes</p>
+    </center>
+    {{else}}
+    <br><br>
+    <center>
+    <div style="padding: 40px; background: #f8f9fa; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <p style="color: #999; font-size: 1.2em;">🎮 Aucun joueur pour le moment...</p>
+        <br>
+        <p style="color: #bbb; font-size: 0.9em;">Soyez le premier à jouer !</p>
+    </div>
+    </center>
+    {{end}}
+</body>
+</html>
