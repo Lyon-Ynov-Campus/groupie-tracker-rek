@@ -34,19 +34,38 @@
             <div class="form-group full">
                 <span class="label">Catégories à utiliser</span>
                 <ul class="checkbox-grid">
-                    {{if .Categories}}
-                        {{range .Categories}}
-                        <li>
-                            <label>
-                                <input type="checkbox" name="categories" value="{{.}}">
-                                <span>{{.}}</span>
-                            </label>
-                        </li>
-                        {{end}}
-                    {{else}}
-                        <li class="category-empty">Ajoutez vos catégories depuis la salle une fois créée.</li>
-                    {{end}}
+                    <li>
+                        <label>
+                            <input type="checkbox" name="categories" value="Artistes" checked>
+                            <span>Artistes</span>
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="checkbox" name="categories" value="Albums" checked>
+                            <span>Albums</span>
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="checkbox" name="categories" value="Groupes" checked>
+                            <span>Groupes</span>
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="checkbox" name="categories" value="Instruments" checked>
+                            <span>Instruments</span>
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="checkbox" name="categories" value="Featuring" checked>
+                            <span>Featuring</span>
+                        </label>
+                    </li>
                 </ul>
+                <p class="hint">Vous pourrez ajouter ou retirer des catégories depuis la salle avant de lancer la partie.</p>
             </div>
 
             <div class="form-group">

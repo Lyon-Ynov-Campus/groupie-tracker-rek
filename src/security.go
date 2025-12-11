@@ -3,12 +3,12 @@ package server
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"strconv"
 )
 
 var sessions = make(map[string]string) // sessionID -> userID
-
 
 // le CreateSession crée une nouvelle session pour un utilisateur donné et retourne l'ID de session qui peut être stocké dans un cookie
 
@@ -34,4 +34,20 @@ func RequireAuth(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func GetSessionUserID(r *http.Request) (int, error) {
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		return 0, fmt.Errorf("session manquante : %w", err)
+	}
+	userIDStr, ok := sessions[cookie.Value]
+	if !ok || userIDStr == "" {
+		return 0, fmt.Errorf("session invalide ou expirée")
+	}
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		return 0, fmt.Errorf("identifiant de session invalide : %w", err)
+	}
+	return userID, nil
 }

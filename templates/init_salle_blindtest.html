@@ -15,6 +15,8 @@
     <section class="card">
         <h2>Créer la salle</h2>
         <form action="/creer-salle" method="post" class="form-grid">
+            <input type="hidden" name="type_jeu" value="blindtest">
+
             <div class="form-group">
                 <label for="creator_name">Votre pseudo</label>
                 <input type="text" id="creator_name" name="creator_name" placeholder="Ex : DJRyan" required>
@@ -22,7 +24,7 @@
 
             <div class="form-group">
                 <label for="max_players">Nombre de participants</label>
-                <input type="number" id="max_players" name="max_players"  value="4" required>
+                <input type="number" id="max_players" name="max_players" min="2" max="10" value="4" required>
             </div>
 
             <div class="form-group full">

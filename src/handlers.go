@@ -2,9 +2,12 @@ package server
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -18,6 +21,18 @@ type LoginPageData struct {
 	Error   string
 	Success string
 	User    string
+}
+
+type SallePageData struct {
+	Room                  *Room
+	Players               []RoomPlayer
+	BlindTestPlaylistID   string
+	BlindTestPlaylistName string
+	PetitBacCategories    []PetitBacCategory
+	GameLabel             string
+	CurrentUserID         int
+	IsMember              bool
+	IsAdmin               bool
 }
 
 func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
@@ -281,4 +296,210 @@ func AfficherCreationPetitBacHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	renderTemplate(w, "init_salle_petitbac.html", nil)
-}	
+}
+
+func CreerSalleHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		return
+	}
+	userID, err := GetSessionUserID(r)
+	if err != nil {
+		log.Printf("Session invalide : %v", err)
+		http.Redirect(w, r, "/connexion", http.StatusSeeOther)
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Formulaire invalide.", http.StatusBadRequest)
+		return
+	}
+
+	roomType := RoomType(strings.TrimSpace(r.FormValue("type_jeu")))
+	maxPlayers, err := strconv.Atoi(strings.TrimSpace(r.FormValue("max_players")))
+	if err != nil {
+		http.Error(w, "Nombre de participants invalide.", http.StatusBadRequest)
+		return
+	}
+	timePerRound, err := strconv.Atoi(strings.TrimSpace(r.FormValue("temps")))
+	if err != nil {
+		http.Error(w, "Temps par manche invalide.", http.StatusBadRequest)
+		return
+	}
+	rounds, err := strconv.Atoi(strings.TrimSpace(r.FormValue("manches")))
+	if err != nil {
+		http.Error(w, "Nombre de manches invalide.", http.StatusBadRequest)
+		return
+	}
+
+	opts := CreateRoomOptions{
+		Type:         roomType,
+		CreatorID:    userID,
+		MaxPlayers:   maxPlayers,
+		TimePerRound: timePerRound,
+		Rounds:       rounds,
+	}
+
+	switch roomType {
+	case RoomTypeBlindTest:
+		opts.PlaylistID = strings.TrimSpace(r.FormValue("playlist"))
+		opts.PlaylistName = opts.PlaylistID
+	case RoomTypePetitBac:
+		opts.Categories = r.Form["categories"]
+	default:
+		http.Error(w, "Type de salle invalide.", http.StatusBadRequest)
+		return
+	}
+
+	room, err := CreateRoom(r.Context(), opts)
+	if err != nil {
+		status := http.StatusInternalServerError
+		message := "Erreur lors de la création de la salle."
+		switch {
+		case errors.Is(err, ErrInvalidRoomParameters), errors.Is(err, ErrInvalidRoomType):
+			status = http.StatusBadRequest
+			message = err.Error()
+		case errors.Is(err, ErrUserNotFound):
+			status = http.StatusBadRequest
+			message = "Utilisateur inconnu."
+		}
+		log.Printf("Création salle échouée : %v", err)
+		http.Error(w, message, status)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/salle/%s", room.Code), http.StatusSeeOther)
+}
+
+func AfficherSalleHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Méthode non autorisée.", http.StatusMethodNotAllowed)
+		return
+	}
+
+	code := strings.TrimPrefix(r.URL.Path, "/salle/")
+	code = strings.SplitN(code, "/", 2)[0]
+	code = strings.TrimSpace(code)
+	if code == "" {
+		http.NotFound(w, r)
+		return
+	}
+
+	room, err := GetRoomByCode(r.Context(), code)
+	if err != nil {
+		if errors.Is(err, ErrRoomNotFound) {
+			http.NotFound(w, r)
+			return
+		}
+		log.Printf("Chargement salle échoué (%s) : %v", code, err)
+		http.Error(w, "Erreur lors du chargement de la salle.", http.StatusInternalServerError)
+		return
+	}
+
+	players, err := ListRoomPlayers(r.Context(), room.ID)
+	if err != nil {
+		log.Printf("Listing joueurs salle %s : %v", room.Code, err)
+		http.Error(w, "Impossible de récupérer les joueurs.", http.StatusInternalServerError)
+		return
+	}
+
+	data := SallePageData{
+		Room:      room,
+		Players:   players,
+		GameLabel: "Salle",
+	}
+
+	switch room.Type {
+	case RoomTypeBlindTest:
+		data.GameLabel = "Blind Test"
+		if cfg, err := GetBlindTestConfig(r.Context(), room.ID); err != nil {
+			log.Printf("Config blindtest salle %s : %v", room.Code, err)
+			http.Error(w, "Impossible de récupérer la configuration Blind Test.", http.StatusInternalServerError)
+			return
+		} else if cfg != nil {
+			data.BlindTestPlaylistID = cfg.PlaylistID
+			data.BlindTestPlaylistName = cfg.PlaylistName
+		}
+	case RoomTypePetitBac:
+		data.GameLabel = "Petit Bac"
+		cats, err := ListPetitBacCategories(r.Context(), room.ID)
+		if err != nil {
+			log.Printf("Catégories petit bac salle %s : %v", room.Code, err)
+			http.Error(w, "Impossible de récupérer les catégories.", http.StatusInternalServerError)
+			return
+		}
+		data.PetitBacCategories = cats
+	default:
+		data.GameLabel = string(room.Type)
+	}
+
+	renderTemplate(w, "salle.html", data)
+}
+
+func RejoindreSalleHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		return
+	}
+
+	userID, err := GetSessionUserID(r)
+	if err != nil {
+		log.Printf("Session invalide : %v", err)
+		http.Redirect(w, r, "/connexion", http.StatusSeeOther)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Formulaire invalide.", http.StatusBadRequest)
+		return
+	}
+
+	inputPseudo := strings.TrimSpace(r.FormValue("player_name"))
+	roomCode := strings.ToUpper(strings.TrimSpace(r.FormValue("room_code")))
+	if roomCode == "" {
+		http.Error(w, "Code de salle requis.", http.StatusBadRequest)
+		return
+	}
+
+	var accountPseudo string
+	if err := Rekdb.QueryRow("SELECT pseudo FROM users WHERE id = ?", userID).Scan(&accountPseudo); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "Compte introuvable.", http.StatusBadRequest)
+			return
+		}
+		log.Printf("Récupération pseudo utilisateur %d: %v", userID, err)
+		http.Error(w, "Erreur interne.", http.StatusInternalServerError)
+		return
+	}
+	if inputPseudo != "" && !strings.EqualFold(inputPseudo, accountPseudo) {
+		http.Error(w, "Le pseudo saisi ne correspond pas à votre compte.", http.StatusBadRequest)
+		return
+	}
+
+	room, err := GetRoomByCode(r.Context(), roomCode)
+	if err != nil {
+		if errors.Is(err, ErrRoomNotFound) {
+			http.Error(w, "Salle introuvable.", http.StatusNotFound)
+			return
+		}
+		log.Printf("Recherche salle %s : %v", roomCode, err)
+		http.Error(w, "Erreur lors de la récupération de la salle.", http.StatusInternalServerError)
+		return
+	}
+
+	if _, err := AddRoomPlayer(r.Context(), room.ID, userID, false); err != nil {
+		switch {
+		case errors.Is(err, ErrRoomCapacityReached):
+			http.Error(w, "La salle est complète.", http.StatusForbidden)
+		case errors.Is(err, ErrPlayerAlreadyInRoom):
+			http.Redirect(w, r, fmt.Sprintf("/salle/%s", room.Code), http.StatusSeeOther)
+		case errors.Is(err, ErrUserNotFound):
+			http.Error(w, "Utilisateur inconnu.", http.StatusBadRequest)
+		default:
+			log.Printf("Rejoindre salle %s (user %d) : %v", room.Code, userID, err)
+			http.Error(w, "Impossible de rejoindre la salle.", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/salle/%s", room.Code), http.StatusSeeOther)
+}
