@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Saha le bac</title>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" href="static/hbbts.ico"/>
+</head>
+
+<body>
+    {{ range . }}
+    <div class = ptitbac>
+        <label class="categorie"> {{ . Categorie}} </label>
+        <input type="text" class="input-categorie" placeholder="{{ . Letter}}"/>
+    </div>
+    {{ end }}
+</body>
