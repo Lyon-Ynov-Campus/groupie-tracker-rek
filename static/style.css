@@ -1,0 +1,203 @@
+/* --- Configuration Globale (Identique à style.css) --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap');
+
+body {
+    margin: 0;
+    padding: 40px 20px; /* Un peu de marge autour du contenu */
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    
+    /* Fond sombre radial */
+    background: radial-gradient(circle at center, #1a1f2b 0%, #0a0e14 100%);
+    color: #ffffff;
+    min-height: 100vh;
+
+    /* Centrage des éléments du jeu */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px; /* Espace entre chaque ligne de catégorie */
+}
+
+h1 {
+    font-size: 3rem; /* Grand titre */
+    font-weight: 800;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin: 30px 0 40px 0;
+    
+    /* Dégradé de texte (Blanc vers Bleu clair) */
+    background: linear-gradient(to right, #ffffff 30%, #00c6ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    
+    /* Ombre lumineuse (Glow) pour l'effet néon */
+    filter: drop-shadow(0 0 15px rgba(0, 114, 255, 0.6));
+    
+    /* Animation subtile (optionnel) */
+    animation: fadeIn 1s ease-out;
+}
+
+/* Petite animation d'apparition */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Conteneur de chaque ligne (Label + Input) --- */
+.ptitbac {
+    /* Style "Carte" repris de .blindtest/.petit-bac */
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid transparent; /* Nécessaire pour le dégradé */
+    border-radius: 15px;
+    padding: 15px 25px;
+    width: 100%;
+    max-width: 700px; /* Largeur max pour que ce soit joli sur PC */
+    backdrop-filter: blur(10px);
+    
+    /* Bordure dégradée Bleu Foncé / Bleu Clair */
+    background-image: linear-gradient(#121212, #121212), 
+                      linear-gradient(135deg, #0072ff, #00c6ff);
+    background-origin: border-box;
+    background-clip: content-box, border-box;
+    
+    /* Ombre portée bleue douce */
+    box-shadow: 0 0 10px rgba(0, 114, 255, 0.2);
+    
+    /* Mise en page interne : Label à gauche, Input à droite */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Pour gérer le mobile */
+    
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Effet de survol sur la ligne */
+.ptitbac:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(0, 114, 255, 0.4), 
+                0 0 40px rgba(0, 198, 255, 0.2);
+    border-color: transparent;
+}
+
+/* --- Le Label (Catégorie) --- */
+.categorie {
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-right: 20px;
+    
+    /* Couleur Bleu Clair avec ombre portée */
+    color: #00c6ff;
+    text-shadow: 0 0 5px rgba(0, 114, 255, 0.8);
+    
+    flex: 1; /* Prend l'espace disponible */
+    min-width: 150px;
+}
+
+/* --- L'Input (Champ de réponse) --- */
+.input-categorie {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    color: #fff;
+    
+    /* Fond sombre mais distinct du conteneur */
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 198, 255, 0.3);
+    border-radius: 8px;
+    padding: 10px 15px;
+    outline: none;
+    
+    flex: 2; /* L'input prend plus de place que le label */
+    min-width: 200px;
+    
+    transition: all 0.3s ease;
+}
+
+/* Placeholder stylisé */
+.input-categorie::placeholder {
+    /* Couleur blanc/bleuté avec haute opacité (0.7 au lieu de 0.3) */
+    color: rgba(200, 240, 255, 0.7); 
+    font-weight: 500;
+    font-style: normal; /* On enlève l'italique pour la lisibilité de la lettre */
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    
+    /* Correction pour l'opacité sur Firefox */
+    opacity: 1; 
+}
+
+/* Focus sur l'input : Brillance intense */
+.input-categorie:focus {
+    border-color: #00c6ff;
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 15px rgba(0, 114, 255, 0.5);
+}
+
+/* --- Responsive (Mobile) --- */
+@media (max-width: 600px) {
+    .ptitbac {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .categorie {
+        margin-right: 0;
+        margin-bottom: 5px;
+    }
+}
+
+.stop {
+    /* Typographie imposante */
+    font-family: 'Poppins', sans-serif;
+    font-size: 2rem;       /* Texte très grand */
+    font-weight: 800;      /* Très gras */
+    text-transform: uppercase;
+    letter-spacing: 4px;   /* Espacement large entre les lettres */
+    color: #ffffff;
+    
+    /* Dimensions et position */
+    display: inline-block;
+    padding: 20px 80px;    /* Bouton large et haut */
+    margin: 40px 0;        /* Espace autour du bouton */
+    cursor: pointer;
+    border: none;
+    
+    /* Fond : Dégradé Bleu Profond vers Cyan */
+    background: linear-gradient(135deg, #005bea 0%, #00c6ff 100%);
+    background-size: 200% auto; /* Prépare l'animation du fond */
+    border-radius: 50px;   /* Bords arrondis (pilule) */
+    
+    /* Lueur initiale (Subrillance douce) */
+    box-shadow: 0 0 20px rgba(0, 198, 255, 0.4);
+    
+    /* Transitions fluides */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* --- Effet au Survol (Hover) --- */
+.stop:hover {
+    /* Le bouton grossit légèrement */
+    transform: scale(1.05) translateY(-5px);
+    
+    /* Changement de position du dégradé pour un effet de brillance */
+    background-position: right center;
+    
+    /* EXPLOSION DE LUMIÈRE (Subrillance intense) */
+    box-shadow: 
+        0 0 10px #fff,                     /* Cœur blanc brillant */
+        0 0 30px rgba(0, 198, 255, 0.8),   /* Halo cyan intense */
+        0 0 60px rgba(0, 114, 255, 0.6);   /* Halo bleu large */
+}
+
+/* --- Effet au Clic (Active) --- */
+.stop:active {
+    transform: scale(0.95); /* Effet de pression */
+    box-shadow: 0 0 15px rgba(0, 198, 255, 0.6);
+}

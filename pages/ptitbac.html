@@ -8,10 +8,20 @@
 </head>
 
 <body>
-    {{ range . }}
-    <div class = ptitbac>
-        <label class="categorie"> {{ . Categorie}} </label>
-        <input type="text" class="input-categorie" placeholder="{{ . Letter}}"/>
-    </div>
-    {{ end }}
+    <h1>La Lettre est : <span style="color: #00c6ff;">{{(index . 0).Letter}}</span></h1>
+    
+    <form action="/finalscoreboard.html" method="POST" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+        
+        {{ range . }}
+        <div class="ptitbac">
+            <label class="categorie"> {{.Categorie}} </label>
+            <input type="text" name="{{.Categorie}}" class="input-categorie" placeholder="{{.Letter}} ..."/>
+        </div>
+        {{ end }}
+
+        <button type="submit" class="stop">STOP</button>
+        
+    </form>
+    
 </body>
+</html>
