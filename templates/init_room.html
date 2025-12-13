@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Initialiser une salle</title>
+    <link rel="stylesheet" href="/static/init_salle.css">
+</head>
+<body>
+<main class="blindtest-wrapper">
+    <section class="card intro">
+        <h1>Créer / Rejoindre une salle</h1>
+        <p>Configure le temps, le nombre de participants et les manches.</p>
+    </section>
+
+    <section class="card">
+        <h2>Créer la salle</h2>
+        <form action="/creer-salle" method="post" class="form-grid">
+            <input type="hidden" name="type_jeu" value="blindtest">
+
+            <div class="form-group">
+                <label for="max_players">Nombre de participants</label>
+                <input type="number" id="max_players" name="max_players" min="2" max="10" value="4" required>
+            </div>
+
+            <div class="form-group">
+                <label for="temps">Temps par manche (secondes, 20-60)</label>
+                <input type="number" id="temps" name="temps" min="20" max="60" value="45" required>
+            </div>
+
+            <div class="form-group">
+                <label for="manches">Nombre de manches (1-15)</label>
+                <input type="number" id="manches" name="manches" min="1" max="15" value="6" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit">Créer la salle</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>Rejoindre une salle existante</h2>
+        <form action="/rejoindre-salle" method="post" class="form-grid">
+            <div class="form-group">
+                <label for="room_code">Code de la salle</label>
+                <input type="text" id="room_code" name="room_code" style="text-transform: uppercase;" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit">Rejoindre</button>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

@@ -12,53 +12,6 @@
     <p>Joueurs : <strong>{{len .Players}}</strong> / {{.Room.MaxPlayers}}</p>
     <p>Paramètres : {{.Room.Rounds}} manches · {{.Room.TimePerRound}}s / manche</p>
 
-    {{if .BlindTestPlaylistName}}
-    <section class="card" style="margin-top: 24px;">
-        <h2>Playlist sélectionnée</h2>
-        <p><strong>{{.BlindTestPlaylistName}}</strong></p>
-        {{if .BlindTestPlaylistID}}
-        <p>ID : {{.BlindTestPlaylistID}}</p>
-        {{end}}
-    </section>
-    {{end}}
-
-    {{if eq .Room.Type "petit_bac"}}
-    <section class="card" style="margin-top: 24px;">
-        <h2>Catégories du Petit Bac</h2>
-        {{if .IsAdmin}}
-        <form method="post" class="category-actions">
-            <input type="hidden" name="form_action" value="add_category">
-            <input type="text" name="label" placeholder="Nouvelle catégorie" required>
-            <button type="submit">Ajouter</button>
-        </form>
-        {{end}}
-        <ul class="category-list">
-            {{range .PetitBacCategories}}
-            <li class="category-item">
-                <span class="category-name">{{.Label}}</span>
-                {{if not .IsActive}}<span style="color:#f87171;">(inactive)</span>{{end}}
-                {{if $.IsAdmin}}
-                <div class="category-actions">
-                    <form method="post">
-                        <input type="hidden" name="form_action" value="toggle_category">
-                        <input type="hidden" name="category_id" value="{{.ID}}">
-                        <button type="submit">{{if .IsActive}}Désactiver{{else}}Activer{{end}}</button>
-                    </form>
-                    <form method="post" onsubmit="return confirm('Supprimer cette catégorie ?');">
-                        <input type="hidden" name="form_action" value="delete_category">
-                        <input type="hidden" name="category_id" value="{{.ID}}">
-                        <button type="submit" class="ghost">Supprimer</button>
-                    </form>
-                </div>
-                {{end}}
-            </li>
-            {{else}}
-            <li class="category-item">Aucune catégorie pour le moment.</li>
-            {{end}}
-        </ul>
-    </section>
-    {{end}}
-
     <section class="card" style="margin-top: 24px;">
         <h2>Participants</h2>
         <ul class="category-list">

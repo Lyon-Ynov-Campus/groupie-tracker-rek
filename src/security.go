@@ -36,6 +36,10 @@ func RequireAuth(next http.Handler) http.Handler {
 	})
 }
 
+// Cette fonction permet d’identifier l’utilisateur connecté à partir du cookie de session et de sécuriser l’accès aux fonctionnalités réservées aux utilisateurs authentifiés.
+//ETANT DONNé que les sessions sont stockées en mémoire pour simplifier la gestion et éviter la complexité d’un système externe.
+
+
 func GetSessionUserID(r *http.Request) (int, error) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
