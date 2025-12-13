@@ -30,7 +30,8 @@ func InitDB(filepath string) (*sql.DB, error) {
 		return nil, err 
 	}
     
-	// Tester la connexion (Ping)
+	// TestONS la connexion  avec  (Ping)
+	
 	if err = database.Ping(); err != nil {
 		log.Printf("Erreur lors du test de connexion (Ping): %v\n", err)
 		database.Close() 
@@ -38,16 +39,8 @@ func InitDB(filepath string) (*sql.DB, error) {
 	}
 	log.Println("Connexion à SQLite établie et vérifiée.")
 
-	//  Définir la commande SQL pour créer la table 'users'
-	createTableQuery := `
-	CREATE TABLE IF NOT EXISTS users (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		pseudo TEXT UNIQUE NOT NULL,
-		email TEXT UNIQUE NOT NULL,
-		password_hash TEXT NOT NULL
-	);`
+	// ensuuite on execute  la commande SQL pour créer la table
 
-	// Exécuter la commande SQL pour créer la table
 	log.Println("Vérification/Création de la table 'users'...")
 	_, err = database.Exec(createTableQuery)
 	if err != nil {
