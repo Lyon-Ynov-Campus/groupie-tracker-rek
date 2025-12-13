@@ -101,4 +101,3 @@ func CreateUser(pseudo, email, password string) error {
 	}
 	return nil
 }
-

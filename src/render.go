@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+
 //Nous avons mis en place une séparation claire entre la logique métier en Go et l’affichage HTML. Les erreurs sont gérées côté Go puis transmises aux templates afin d’améliorer la lisibilité du code et l’expérience utilisateur.
 
 type RegisterPageData struct {
@@ -18,6 +19,7 @@ type LoginPageData struct {
 	Success string
 	User    string
 }
+
 
 func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
 	t, err := template.ParseFiles("./templates/" + name)
@@ -32,6 +34,7 @@ func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
 		http.Error(w, "Erreur serveur.", http.StatusInternalServerError)
 	}
 }
+
 
 func renderRegister(w http.ResponseWriter, data RegisterPageData) {
 	renderTemplate(w, "accueil.html", data)
