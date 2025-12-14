@@ -26,6 +26,9 @@ func main() {
 	http.Handle("/rejoindre-salle", server.RequireAuth(http.HandlerFunc(server.RejoindreSalleHandler)))
 	http.Handle("/salle/", server.RequireAuth(http.HandlerFunc(server.AfficherSalleHandler)))
 	http.Handle("/ws/salle/", server.RequireAuth(http.HandlerFunc(server.WSRoomHandler)))
+	http.Handle("/game/", server.RequireAuth(http.HandlerFunc(server.GameHandler)))
+	http.Handle("/api/salle/", server.RequireAuth(http.HandlerFunc(server.APISalleHandler)))
+
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	http.ListenAndServe(":8080", nil)
 }

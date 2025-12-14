@@ -28,6 +28,7 @@ var (
 	ErrPlayerAlreadyInRoom    = errors.New("player already in room")
 	ErrInvalidRoomType        = errors.New("invalid room type")
 	ErrInvalidRoomParameters  = errors.New("invalid room parameters")
+	ErrPlayerNotFound         = errors.New("player not found")
 )
 
 type RoomType string
@@ -334,4 +335,18 @@ func randomRoomCode() (string, error) {
 		b.WriteByte(roomCodeAlphabet[idx.Int64()])
 	}
 	return b.String(), nil
+}
+
+func RemoveRoomPlayer(ctx context.Context, roomID, userID int) error {
+	if Rekdb == nil {
+		return ErrDatabaseNotInitialised
+	}
+	res, err := Rekdb.ExecContext(ctx, SQLDeleteRoomPlayer, roomID, userID)
+	if err != nil {
+		return err
+	}
+	if rows, _ := res.RowsAffected(); rows == 0 {
+		return ErrPlayerNotFound
+	}
+	return nil
 }

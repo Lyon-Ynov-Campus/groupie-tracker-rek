@@ -339,6 +339,18 @@ func AfficherSalleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// /salle/{code}/start
+	if len(parts) >= 2 && parts[1] == "start" {
+		StartBlindtestHandler(w, r, code)
+		return
+	}
+
+	// /salle/{code}/leave
+	if len(parts) >= 2 && parts[1] == "leave" {
+		QuitterSalleHandler(w, r, code)
+		return
+	}
+
 	if r.Method != http.MethodGet {
 		http.Error(w, "Méthode non autorisée.", http.StatusMethodNotAllowed)
 		return
@@ -604,4 +616,56 @@ func ConfigurerSalleHandler(w http.ResponseWriter, r *http.Request, code string)
 		http.Error(w, "Type de salle invalide.", http.StatusBadRequest)
 		return
 	}
+}
+
+func QuitterSalleHandler(w http.ResponseWriter, r *http.Request, code string) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Méthode non autorisée.", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := GetSessionUserID(r)
+	if err != nil {
+		http.Redirect(w, r, "/connexion", http.StatusSeeOther)
+		return
+	}
+
+	room, err := GetRoomByCode(r.Context(), code)
+	if err != nil {
+		if errors.Is(err, ErrRoomNotFound) {
+			http.NotFound(w, r)
+			return
+		}
+		http.Error(w, "Erreur room.", http.StatusInternalServerError)
+		return
+	}
+
+	// Vérifier que l'utilisateur est bien membre de la salle
+	ok, err := IsUserInRoom(r.Context(), room.ID, userID)
+	if err != nil {
+		log.Printf("Check membre salle %s : %v", room.Code, err)
+		http.Error(w, "Erreur lors du chargement de la salle.", http.StatusInternalServerError)
+		return
+	}
+	if !ok {
+		http.Redirect(w, r, "/salle-initialisation", http.StatusSeeOther)
+		return
+	}
+
+	var pseudo string
+	if err := Rekdb.QueryRowContext(r.Context(), SQLSelectUserPseudoByID, userID).Scan(&pseudo); err != nil {
+		pseudo = ""
+	}
+
+	if err := RemoveRoomPlayer(r.Context(), room.ID, userID); err != nil {
+		http.Error(w, "Impossible de quitter la salle.", http.StatusInternalServerError)
+		return
+	}
+
+	BroadcastRoomUpdated(room.ID)
+	if pseudo != "" {
+		BroadcastPlayerLeft(room.ID, pseudo)
+	}
+
+	http.Redirect(w, r, "/salle-initialisation", http.StatusSeeOther)
 }

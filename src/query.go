@@ -125,4 +125,7 @@ const (
 	SQLInsertPetitBacCategory = `INSERT INTO room_petitbac_categories (room_id, name, position) VALUES (?, ?, ?)`
 	SQLUpdatePetitBacCategory = `UPDATE room_petitbac_categories SET name = ? WHERE id = ? AND room_id = ?`
 	SQLDeletePetitBacCategory = `DELETE FROM room_petitbac_categories WHERE id = ? AND room_id = ?`
+
+	SQLAddScoreToRoomPlayer = `UPDATE room_players SET score = score + ? WHERE room_id = ? AND user_id = ?`
+	SQLDeleteRoomPlayer     = `DELETE FROM room_players WHERE room_id = ? AND user_id = ?`
 )

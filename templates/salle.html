@@ -60,6 +60,16 @@
         {{end}}
     </ul>
     {{end}}
+
+    {{if and .IsAdmin (eq (printf "%s" .Room.Type) "blindtest")}}
+    <form action="/salle/{{.Room.Code}}/start" method="post" class="form-actions" style="margin-top: 10px;">
+      <button type="submit">Commencer le jeu</button>
+    </form>
+    {{end}}
+
+    <form action="/salle/{{.Room.Code}}/leave" method="post" class="form-actions" style="margin-top: 12px;">
+      <button type="submit">Quitter la salle</button>
+    </form>
 </main>
 <script src="/static/ws_room.js" defer></script>
 </body>

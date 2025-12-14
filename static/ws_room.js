@@ -11,6 +11,10 @@
       if (msg.type === "room_updated") {
         location.reload();
       }
+      if (msg.type === "blindtest_round_started") {
+        location.href = `/game/${encodeURIComponent(code)}`;
+        return;
+      }
     } catch (_) {}
   };
 })();

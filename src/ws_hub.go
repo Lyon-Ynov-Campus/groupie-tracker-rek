@@ -71,3 +71,11 @@ func BroadcastRoomUpdated(roomID int) {
 	h := getRoomHub(roomID)
 	h.broadcast <- mustJSON(WSMessage{Type: "room_updated", Payload: map[string]any{"room_id": roomID}})
 }
+
+func BroadcastPlayerLeft(roomID int, pseudo string) {
+	h := getRoomHub(roomID)
+	h.broadcast <- mustJSON(WSMessage{
+		Type:    "player_left",
+		Payload: map[string]any{"room_id": roomID, "pseudo": pseudo},
+	})
+}
