@@ -1,6 +1,5 @@
 package server
 
-
 // TablesSQL contient toutes les requêtes de création de tables
 var TablesSQL = map[string]string{
 	"users": `CREATE TABLE IF NOT EXISTS users (
@@ -27,22 +26,33 @@ var TablesSQL = map[string]string{
 		score INTEGER DEFAULT 0,
 		PRIMARY KEY (room_id, user_id)
 	);`,
+	"room_blindtest_settings": `CREATE TABLE IF NOT EXISTS room_blindtest_settings (
+    room_id INTEGER PRIMARY KEY,
+    playlist TEXT NOT NULL
+);`,
+	"room_petitbac_categories": `CREATE TABLE IF NOT EXISTS room_petitbac_categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    room_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    position INTEGER NOT NULL
+);`,
 }
 
-	
-// Fonction pour inserer les données d'un nouvel utilisateur dans la base de données 
+// Fonction pour inserer les données d'un nouvel utilisateur dans la base de données
 //variable IndexesSQL contient les requêtes de création d'index LIANT les tables entre elles
 
 var IndexesSQL = map[string]string{
-	"idx_rooms_owner":       "CREATE INDEX IF NOT EXISTS idx_rooms_owner ON rooms(creator_id);",
-	"idx_room_players_room": "CREATE INDEX IF NOT EXISTS idx_room_players_room ON room_players(room_id);",
+	"idx_rooms_owner":                  "CREATE INDEX IF NOT EXISTS idx_rooms_owner ON rooms(creator_id);",
+	"idx_room_players_room":            "CREATE INDEX IF NOT EXISTS idx_room_players_room ON room_players(room_id);",
+	"idx_blindtest_settings_room":      "CREATE INDEX IF NOT EXISTS idx_blindtest_settings_room ON room_blindtest_settings(room_id);",
+	"idx_petitbac_categories_room":     "CREATE INDEX IF NOT EXISTS idx_petitbac_categories_room ON room_petitbac_categories(room_id);",
+	"idx_petitbac_categories_room_pos": "CREATE UNIQUE INDEX IF NOT EXISTS idx_petitbac_categories_room_pos ON room_petitbac_categories(room_id, position);",
 }
 
 func InsertValuesUser(pseudo, email, passwordHash string) error {
 	_, err := Rekdb.Exec("INSERT INTO users (pseudo, email, password_hash) VALUES (?, ?, ?)", pseudo, email, passwordHash)
 	return err
-}	
-
+}
 
 // PRAGMA
 const SQLPragmaForeignKeysOn = `PRAGMA foreign_keys = ON`
@@ -95,5 +105,24 @@ const (
 	SQLSelectIsAdminInRoom = `
         SELECT is_admin FROM room_players WHERE room_id = ? AND user_id = ?
     `
-)
 
+	// Blindtest settings
+	SQLSelectBlindtestPlaylistByRoomID = `SELECT playlist FROM room_blindtest_settings WHERE room_id = ?`
+	SQLUpsertBlindtestPlaylist         = `
+    INSERT INTO room_blindtest_settings (room_id, playlist)
+    VALUES (?, ?)
+    ON CONFLICT(room_id) DO UPDATE SET playlist = excluded.playlist
+`
+
+	// Petit bac categories
+	SQLCountPetitBacCategoriesByRoomID = `SELECT COUNT(*) FROM room_petitbac_categories WHERE room_id = ?`
+	SQLListPetitBacCategoriesByRoomID  = `
+    SELECT id, name, position
+    FROM room_petitbac_categories
+    WHERE room_id = ?
+    ORDER BY position ASC
+`
+	SQLInsertPetitBacCategory = `INSERT INTO room_petitbac_categories (room_id, name, position) VALUES (?, ?, ?)`
+	SQLUpdatePetitBacCategory = `UPDATE room_petitbac_categories SET name = ? WHERE id = ? AND room_id = ?`
+	SQLDeletePetitBacCategory = `DELETE FROM room_petitbac_categories WHERE id = ? AND room_id = ?`
+)

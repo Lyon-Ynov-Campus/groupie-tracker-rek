@@ -69,6 +69,9 @@ type SallePageData struct {
 	Players   []RoomPlayer
 	GameLabel string
 	IsAdmin   bool
+
+	BlindtestPlaylist  string
+	PetitBacCategories []PetitBacCategory
 }
 
 func CreateRoom(ctx context.Context, opts CreateRoomOptions) (*Room, error) {

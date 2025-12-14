@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuration – Salle {{.GameLabel}} – {{.Room.Code}}</title>
+    <link rel="stylesheet" href="/static/init_salle.css">
+</head>
+<body>
+<main class="jeu-wrapper">
+    <section class="card intro">
+        <h1>Configurer la salle {{.GameLabel}}</h1>
+        <p>Code : <strong>{{.Room.Code}}</strong></p>
+        <p>Paramètres communs : {{.Room.Rounds}} manches · {{.Room.TimePerRound}}s / manche · {{.Room.MaxPlayers}} joueurs</p>
+    </section>
+
+    {{if .Error}}
+    <section class="card">
+        <p style="color: rgba(255, 190, 190, 0.95); margin: 0;">{{.Error}}</p>
+    </section>
+    {{end}}
+
+    <section class="card">
+        {{if eq (printf "%s" .Room.Type) "blindtest"}}
+            <h2>Playlist (Blind Test)</h2>
+            <form action="/salle/{{.Room.Code}}/config" method="post" class="form-grid">
+                <div class="form-group">
+                    <label for="playlist">Choix de la playlist (Rock, Rap, Pop)</label>
+                    <input type="text" id="playlist" name="playlist" list="playlists" value="{{.BlindtestPlaylist}}" required>
+                    <datalist id="playlists">
+                        <option value="Rock"></option>
+                        <option value="Rap"></option>
+                        <option value="Pop"></option>
+                    </datalist>
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Enregistrer</button>
+                </div>
+            </form>
+        {{end}}
+
+        {{if eq (printf "%s" .Room.Type) "petit_bac"}}
+            <h2>Catégories (Petit Bac)</h2>
+            <form action="/salle/{{.Room.Code}}/config" method="post" class="form-grid">
+                <div class="form-group">
+                    <label>Catégories</label>
+                    {{range .PetitBacCategories}}
+                    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                        <input type="text" name="name_{{.ID}}" value="{{.Name}}" required style="flex: 1; min-width: 220px;">
+                        <label style="display:flex; gap:8px; align-items:center; text-transform:none; font-weight:500;">
+                            <input type="checkbox" name="delete_{{.ID}}">
+                            Supprimer
+                        </label>
+                    </div>
+                    {{end}}
+                </div>
+
+                <div class="form-group">
+                    <label for="new_category">Ajouter une catégorie</label>
+                    <input type="text" id="new_category" name="new_category" placeholder="Ex: Style musical">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit">Enregistrer</button>
+                </div>
+            </form>
+        {{end}}
+    </section>
+
+    <section class="card">
+        <form action="/salle/{{.Room.Code}}" method="get" class="form-actions">
+            <button type="submit">Retour à la salle</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>
