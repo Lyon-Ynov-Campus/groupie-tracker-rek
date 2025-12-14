@@ -1,0 +1,1 @@
+SQLAddScoreToRoomPlayer = `UPDATE room_players SET score = score + ? WHERE room_id = ? AND user_id = ?`
