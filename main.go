@@ -25,6 +25,7 @@ func main() {
 	http.Handle("/creer-salle", server.RequireAuth(http.HandlerFunc(server.CreerSalleHandler)))
 	http.Handle("/rejoindre-salle", server.RequireAuth(http.HandlerFunc(server.RejoindreSalleHandler)))
 	http.Handle("/salle/", server.RequireAuth(http.HandlerFunc(server.AfficherSalleHandler)))
+	http.Handle("/ws/salle/", server.RequireAuth(http.HandlerFunc(server.WSRoomHandler)))
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	http.ListenAndServe(":8080", nil)
 }

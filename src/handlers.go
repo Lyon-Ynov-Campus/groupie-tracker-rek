@@ -212,7 +212,9 @@ func LandingPageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteSession(sessionID string) {
+	sessionsMu.Lock()
 	delete(sessions, sessionID)
+	sessionsMu.Unlock()
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -461,6 +463,7 @@ func RejoindreSalleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	BroadcastRoomUpdated(room.ID)
 	http.Redirect(w, r, fmt.Sprintf("/salle/%s", room.Code), http.StatusSeeOther)
 }
 
@@ -534,6 +537,7 @@ func ConfigurerSalleHandler(w http.ResponseWriter, r *http.Request, code string)
 				http.Error(w, "Erreur lors de l'enregistrement.", http.StatusInternalServerError)
 				return
 			}
+			BroadcastRoomUpdated(room.ID)
 			http.Redirect(w, r, "/salle/"+room.Code, http.StatusSeeOther)
 			return
 		}
@@ -580,6 +584,7 @@ func ConfigurerSalleHandler(w http.ResponseWriter, r *http.Request, code string)
 				_ = AddPetitBacCategory(r.Context(), room.ID, newCat)
 			}
 
+			BroadcastRoomUpdated(room.ID)
 			http.Redirect(w, r, "/salle/"+room.Code+"/config", http.StatusSeeOther)
 			return
 		}

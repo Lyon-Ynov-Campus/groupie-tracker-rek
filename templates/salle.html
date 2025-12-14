@@ -5,7 +5,7 @@
     <title>Salle {{.GameLabel}} – {{.Room.Code}}</title>
     <link rel="stylesheet" href="/static/init_salle.css">
 </head>
-<body>
+<body data-room-code="{{.Room.Code}}">
 <main class="card intro" style="max-width: 760px; margin: 40px auto;">
     <h1>Salle {{.GameLabel}}</h1>
     <p>Code : <strong>{{.Room.Code}}</strong></p>
@@ -61,5 +61,6 @@
     </ul>
     {{end}}
 </main>
+<script src="/static/ws_room.js" defer></script>
 </body>
 </html>
