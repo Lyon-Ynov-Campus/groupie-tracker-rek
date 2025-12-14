@@ -15,7 +15,7 @@
     <section class="card">
         <h2>Créer la salle</h2>
         <form action="/creer-salle" method="post" class="form-grid">
-            <input type="hidden" name="type_jeu" value="blindtest">
+            <input type="hidden" name="type_jeu" value="{{.TypeJeu}}">
 
             <div class="form-group">
                 <label for="max_players">Nombre de participants</label>

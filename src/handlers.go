@@ -11,7 +11,6 @@ import (
 	"time"
 )
 
-
 // le Homehandler(qui est la premiere page de notre application) affiche la page d'inscription avec un bouton qui dirige vers la page de connexion
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -236,14 +235,26 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/connexion", http.StatusSeeOther)
 }
-	
 
 func AfficherCreationSalleHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 		return
 	}
-	renderTemplate(w, "init_room.html", nil)
+
+	typeJeu := strings.TrimSpace(r.URL.Query().Get("type_jeu"))
+	switch RoomType(typeJeu) {
+	case RoomTypeBlindTest, RoomTypePetitBac:
+		// ok
+	default:
+		typeJeu = string(RoomTypeBlindTest)
+	}
+
+	renderTemplate(w, "init_room.html", struct {
+		TypeJeu string
+	}{
+		TypeJeu: typeJeu,
+	})
 }
 
 func CreerSalleHandler(w http.ResponseWriter, r *http.Request) {
