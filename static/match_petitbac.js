@@ -1,200 +1,192 @@
-(function () {
-  const code = document.body?.dataset?.roomCode;
-  if (!code) return;
+const roomCode = document.body.dataset.roomCode;
+const statusEl = document.getElementById('status');
+const timerEl = document.getElementById('timer');
+const letterEl = document.getElementById('letter');
+const roundEl = document.getElementById('round');
+const answersForm = document.getElementById('answersForm');
+const categoriesDiv = document.getElementById('categories');
+const votesForm = document.getElementById('votesForm');
+const votesDiv = document.getElementById('votes');
+const scoreboard = document.getElementById('scoreboard');
+const scoreList = document.getElementById('scoreList');
 
-  const statusEl = document.getElementById("status");
-  const timerEl = document.getElementById("timer");
-  const letterEl = document.getElementById("letter");
-  const answersForm = document.getElementById("answersForm");
-  const categoriesDiv = document.getElementById("categories");
-  const votesForm = document.getElementById("votesForm");
-  const votesDiv = document.getElementById("votes");
-  const scoreboard = document.getElementById("scoreboard");
-  const scoreList = document.getElementById("scoreList");
-  const replayBtn = document.getElementById("replayBtn");
+let ws;
+let state = null;
+let lastPhase = null;
+let localAnswers = {};
 
-  let phase = "idle";
-  let endsAtUnix = 0;
-  let categories = [];
-  let letter = "";
-  let answers = {};
-  let allAnswers = {};
-  let votes = {};
+function fetchState() {
+  fetch(`/api/salle/${roomCode}/petitbac/state`)
+    .then(r => r.json())
+    .then(updateUI)
+    .catch(() => statusEl.textContent = "Erreur de connexion.");
+}
 
-  function api(path, opts) {
-    return fetch(`/api/salle/${encodeURIComponent(code)}/petitbac/${path}`, opts);
+function updateUI(newState) {
+  state = newState;
+  if (!state || !state.phase) {
+    statusEl.textContent = "En attente du jeu…";
+    return;
+  }
+  // Timer & round
+  timerEl.textContent = state.endsAt ? `⏰ ${Math.max(0, Math.floor(state.endsAt - Date.now() / 1000))}s` : '';
+  roundEl.textContent = state.round ? `Manche ${state.round}` : '';
+  letterEl.textContent = state.letter ? `Lettre : ${state.letter}` : '';
+
+  if (state.phase === "playing") {
+    statusEl.textContent = "Remplis tes réponses !";
+    answersForm.style.display = "";
+    votesForm.style.display = "none";
+    scoreboard.style.display = "none";
+    renderCategories();
+  } else if (state.phase === "validation") {
+    statusEl.textContent = "Vote sur les réponses des autres !";
+    answersForm.style.display = "none";
+    votesForm.style.display = "";
+    scoreboard.style.display = "none";
+    renderVotes();
+  } else if (state.phase === "finished") {
+    statusEl.textContent = "Scores finaux";
+    answersForm.style.display = "none";
+    votesForm.style.display = "none";
+    scoreboard.style.display = "";
+    renderScoreboard();
+  } else {
+    statusEl.textContent = "En attente des joueurs…";
+    answersForm.style.display = "none";
+    votesForm.style.display = "none";
+    scoreboard.style.display = "none";
   }
 
-  function show(el) { el && (el.style.display = ""); }
-  function hide(el) { el && (el.style.display = "none"); }
-
-  function renderCategories(cats, prevAnswers = {}) {
-    categoriesDiv.innerHTML = "";
-    cats.forEach(cat => {
-      const group = document.createElement("div");
-      group.className = "form-group";
-      const label = document.createElement("label");
-      label.htmlFor = "cat" + cat.ID;
-      label.textContent = cat.Name;
-      const input = document.createElement("input");
-      input.type = "text";
-      input.id = "cat" + cat.ID;
-      input.name = "cat" + cat.ID;
-      input.autocomplete = "off";
-      input.value = prevAnswers[cat.ID] || "";
-      group.appendChild(label);
-      group.appendChild(input);
-      categoriesDiv.appendChild(group);
-    });
-  }
-
-  function renderVotes(votesData, cats, players) {
-    votesDiv.innerHTML = "";
-    cats.forEach(cat => {
-      const catDiv = document.createElement("div");
-      catDiv.className = "form-group";
-      const catLabel = document.createElement("label");
-      catLabel.textContent = cat.Name;
-      catDiv.appendChild(catLabel);
-
-      const ul = document.createElement("ul");
-      ul.style.listStyle = "none";
-      ul.style.padding = 0;
-
-      (votesData[cat.ID] || []).forEach(ans => {
-        const li = document.createElement("li");
-        const chk = document.createElement("input");
-        chk.type = "checkbox";
-        chk.name = `vote_${cat.ID}_${ans.userID}`;
-        chk.checked = ans.valid;
-        li.appendChild(chk);
-        li.appendChild(document.createTextNode(` ${ans.pseudo}: ${ans.answer}`));
-        ul.appendChild(li);
+  // Soumission automatique si on quitte la phase "playing" sans avoir validé
+  if (lastPhase === "playing" && newState.phase !== "playing") {
+    if (answersForm.style.display !== "none") {
+      const data = {};
+      state.categories.forEach(cat => {
+        data[cat.ID] = localAnswers[cat.ID] || "";
       });
-
-      catDiv.appendChild(ul);
-      votesDiv.appendChild(catDiv);
-    });
-  }
-
-  function renderScoreboard(scores) {
-    scoreList.innerHTML = "";
-    scores.forEach(s => {
-      const li = document.createElement("li");
-      li.textContent = `${s.pseudo} : ${s.score}`;
-      scoreList.appendChild(li);
-    });
-  }
-
-  function startTimerUI() {
-    if (!endsAtUnix) { timerEl.textContent = ""; return; }
-    function update() {
-      const now = Math.floor(Date.now() / 1000);
-      const left = Math.max(0, endsAtUnix - now);
-      timerEl.textContent = left > 0 ? `Temps restant : ${left}s` : "";
-      if (left > 0) setTimeout(update, 500);
-    }
-    update();
-  }
-
-  async function refreshState() {
-    const res = await api("state");
-    if (!res.ok) { statusEl.textContent = "Erreur de connexion."; return; }
-    const state = await res.json();
-    phase = state.phase;
-    endsAtUnix = state.endsAt;
-    letter = state.letter || "";
-    categories = state.categories || [];
-    answers = state.answers || {};
-    allAnswers = state.allAnswers || {};
-    votes = state.votes || {};
-    const scores = state.scores || [];
-    const players = state.players || [];
-
-    letterEl.textContent = letter ? `Lettre : ${letter}` : "";
-
-    // Afficher le round si présent
-    if (state.round !== undefined && state.totalRounds !== undefined) {
-      document.getElementById("round").textContent =
-        "Manche " + state.round + " / " + state.totalRounds;
-    }
-
-    if (phase === "playing") {
-      statusEl.textContent = "À toi de jouer !";
-      show(answersForm);
-      hide(votesForm);
-      hide(scoreboard);
-      renderCategories(categories, answers);
-      startTimerUI();
-    } else if (phase === "validation") {
-      statusEl.textContent = "Vote sur les réponses des autres joueurs.";
-      hide(answersForm);
-      show(votesForm);
-      hide(scoreboard);
-      renderVotes(allAnswers, categories, players);
-      startTimerUI();
-    } else if (phase === "finished") {
-      statusEl.textContent = "Partie terminée !";
-      hide(answersForm);
-      hide(votesForm);
-      show(scoreboard);
-      renderScoreboard(scores);
-      timerEl.textContent = "";
-    } else {
-      statusEl.textContent = "En attente du début de la partie…";
-      hide(answersForm);
-      hide(votesForm);
-      hide(scoreboard);
-      timerEl.textContent = "";
-      letterEl.textContent = "";
-    }
-  }
-
-  answersForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const data = {};
-    categories.forEach(cat => {
-      const val = document.getElementById("cat" + cat.ID)?.value || "";
-      data[cat.ID] = val;
-    });
-    await api("answers", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    await refreshState();
-  });
-
-  votesForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const data = {};
-    categories.forEach(cat => {
-      data[cat.ID] = {};
-      const catVotes = votesDiv.querySelectorAll(`input[name^="vote_${cat.ID}_"]`);
-      catVotes.forEach(input => {
-        const userID = input.name.split("_")[2];
-        data[cat.ID][userID] = input.checked;
+      fetch(`/api/salle/${roomCode}/petitbac/answers`, {
+        method: "POST",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
       });
-    });
-    await api("votes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    await refreshState();
-  });
+      localAnswers = {};
+    }
+  }
+  lastPhase = newState.phase;
+}
 
-  if (replayBtn) {
-    replayBtn.addEventListener("click", async () => {
-      await api("restart", { method: "POST" });
-      await refreshState();
+function renderCategories() {
+  categoriesDiv.innerHTML = "";
+  if (!state.categories) return;
+
+  // Reset localAnswers si on change de manche
+  if (!localAnswers.__round || localAnswers.__round !== state.round) {
+    localAnswers = {__round: state.round};
+    const myAnswers = (state.answers && state.answers[state.userID]) || {};
+    state.categories.forEach(cat => {
+      localAnswers[cat.ID] = myAnswers[cat.ID] || "";
     });
   }
 
-  // WebSocket pour rafraîchir l’état
-  const proto = (location.protocol === "https:") ? "wss" : "ws";
-  const ws = new WebSocket(`${proto}://${location.host}/ws/salle/${encodeURIComponent(code)}`);
-  ws.onmessage = () => refreshState();
+  state.categories.forEach(cat => {
+    const val = localAnswers[cat.ID] || "";
+    const div = document.createElement('div');
+    div.className = "form-group";
+    div.innerHTML = `
+      <label for="cat${cat.ID}">${cat.Name}</label>
+      <input type="text" id="cat${cat.ID}" name="${cat.ID}" value="${val}" autocomplete="off">
+    `;
+    // MAJ localAnswers à chaque frappe
+    div.querySelector('input').addEventListener('input', e => {
+      localAnswers[cat.ID] = e.target.value;
+    });
+    categoriesDiv.appendChild(div);
+  });
+}
 
-  refreshState();
-})();
+function renderVotes() {
+  votesDiv.innerHTML = "";
+  if (!state.categories || !state.players || !state.answers) return;
+  state.players.forEach(player => {
+    if (!state.answers[player.UserID]) return;
+    const group = document.createElement('fieldset');
+    group.innerHTML = `<legend>${player.Pseudo}</legend>`;
+    state.categories.forEach(cat => {
+      const answer = state.answers[player.UserID][cat.ID] || "";
+      const id = `vote_${player.UserID}_${cat.ID}`;
+      group.innerHTML += `
+        <div class="form-group">
+          <label for="${id}">${cat.Name} : <b>${answer}</b></label>
+          <select name="${player.UserID}__${cat.ID}" id="${id}" required>
+            <option value="">Vote…</option>
+            <option value="1">Valide</option>
+            <option value="0">Refusé</option>
+          </select>
+        </div>
+      `;
+    });
+    votesDiv.appendChild(group);
+  });
+}
+
+function renderScoreboard() {
+  scoreList.innerHTML = "";
+  if (!state.players) return;
+  state.players.forEach(player => {
+    const li = document.createElement('li');
+    li.textContent = `${player.Pseudo} : ${player.Score} pts`;
+    scoreList.appendChild(li);
+  });
+}
+
+// Form submissions
+answersForm.onsubmit = function(e) {
+  e.preventDefault();
+  const data = {};
+  state.categories.forEach(cat => {
+    data[cat.ID] = localAnswers[cat.ID] || "";
+  });
+  fetch(`/api/salle/${roomCode}/petitbac/answers`, {
+    method: "POST",
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  }).then(() => {
+    localAnswers = {};
+    fetchState();
+  });
+};
+
+votesForm.onsubmit = function(e) {
+  e.preventDefault();
+  const data = {};
+  new FormData(votesForm).forEach((v, k) => {
+    const [userID, catID] = k.split("__");
+    if (!data[catID]) data[catID] = {};
+    data[catID][userID] = v === "1";
+  });
+  fetch(`/api/salle/${roomCode}/petitbac/votes`, {
+    method: "POST",
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  }).then(fetchState);
+};
+
+// WebSocket for live updates
+function connectWS() {
+  const proto = location.protocol === "https:" ? "wss" : "ws";
+  ws = new WebSocket(`${proto}://${location.host}/ws/salle/${encodeURIComponent(roomCode)}`);
+  ws.onmessage = fetchState;
+  ws.onclose = () => setTimeout(connectWS, 2000);
+}
+connectWS();
+fetchState();
+setInterval(fetchState, 5000);
+
+function updateTimerUI() {
+  if (state && state.endsAt) {
+    const sec = Math.max(0, Math.floor(state.endsAt - Date.now() / 1000));
+    timerEl.textContent = `⏰ ${sec}s`;
+  }
+}
+setInterval(updateTimerUI, 1000);

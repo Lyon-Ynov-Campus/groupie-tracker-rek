@@ -15,7 +15,7 @@ type PetitBacGame struct {
 	timePerRound time.Duration
 
 	mu      sync.Mutex
-	phase   string // "idle"|"playing"|"validation"|"finished"
+	phase   string // "idle" | "playing" | "validation" | "finished"
 	round   int
 	endsAt  time.Time
 	letter  string
@@ -53,7 +53,6 @@ func StartOrResetPetitBac(ctx context.Context, room *Room) (*PetitBacGame, error
 	})
 	petitBacGames[room.ID] = game
 
-	// Broadcast event spécifique pour permettre côté client une redirection vers /game/{code}
 	getRoomHub(room.ID).broadcast <- mustJSON(WSMessage{
 		Type: "petitbac_round_started",
 		Payload: map[string]any{
@@ -90,16 +89,12 @@ func (g *PetitBacGame) SubmitAnswers(userID int, answers map[int]string) error {
 		}
 	}
 	if allFilled {
-		// Fin du tour pour tout le monde
 		if g.timer != nil {
 			g.timer.Stop()
 			g.timer = nil
 		}
 		go g.onRoundEnd()
-		return nil
 	}
-
-	// Sinon, attendre la fin du timer
 	return nil
 }
 
@@ -109,6 +104,21 @@ func (g *PetitBacGame) onRoundEnd() {
 	if g.phase != "playing" {
 		return
 	}
+
+	// S'assurer que chaque joueur a une entrée dans g.answers (même vide)
+	players, _ := ListRoomPlayers(context.Background(), g.roomID)
+	categories, _ := ListPetitBacCategories(context.Background(), g.roomID)
+	for _, p := range players {
+		if g.answers[p.UserID] == nil {
+			g.answers[p.UserID] = map[int]string{}
+		}
+		for _, cat := range categories {
+			if _, ok := g.answers[p.UserID][cat.ID]; !ok {
+				g.answers[p.UserID][cat.ID] = ""
+			}
+		}
+	}
+
 	g.phase = "validation"
 	g.endsAt = time.Now().Add(30 * time.Second)
 	g.votes = make(map[int]map[int]map[int]bool)
@@ -118,7 +128,7 @@ func (g *PetitBacGame) onRoundEnd() {
 	})
 }
 
-func (g *PetitBacGame) SubmitVotes(voterID int, votes map[int]map[int]bool) error {
+func (g *PetitBacGame) SubmitVotes(userID int, votes map[int]map[int]bool) error {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	if g.phase != "validation" {
@@ -128,105 +138,95 @@ func (g *PetitBacGame) SubmitVotes(voterID int, votes map[int]map[int]bool) erro
 		if g.votes[catID] == nil {
 			g.votes[catID] = map[int]map[int]bool{}
 		}
-		for userID, valid := range userVotes {
-			if g.votes[catID][userID] == nil {
-				g.votes[catID][userID] = map[int]bool{}
+		for targetUserID, valid := range userVotes {
+			if g.votes[catID][targetUserID] == nil {
+				g.votes[catID][targetUserID] = map[int]bool{}
 			}
-			g.votes[catID][userID][voterID] = valid
+			g.votes[catID][targetUserID][userID] = valid
 		}
 	}
 	return nil
 }
 
 func (g *PetitBacGame) onValidationEnd() {
+	g.mu.Lock()
+	defer g.mu.Unlock()
 	ctx := context.Background()
 	nbPlayers := countPlayersInRoom(g.roomID)
-	if nbPlayers == 0 {
-		g.phase = "finished"
-		return
-	}
+	categories, _ := ListPetitBacCategories(ctx, g.roomID)
 
-	// Pour chaque catégorie et chaque joueur, compter les votes
-	for catID, userVotes := range g.votes {
-		// Pour chaque joueur ayant donné une réponse dans cette catégorie
-		for userID, voters := range userVotes {
-			// Calcul du nombre de validations reçues
+	for _, cat := range categories {
+		catID := cat.ID
+		for userID, userAnswers := range g.answers {
+			answer := userAnswers[catID]
+			// Compter les votes valides
 			nbVotes := 0
-			for _, valid := range voters {
+			for _, valid := range g.votes[catID][userID] {
 				if valid {
 					nbVotes++
 				}
 			}
-			// Seuil de validation : 2/3 arrondi supérieur
 			seuil := (2*nbPlayers + 2) / 3
-			isValid := nbVotes >= seuil
-
-			// Récupérer la réponse du joueur
-			answer := ""
-			if g.answers[userID] != nil {
-				answer = g.answers[userID][catID]
-			}
-
-			// Compter combien de joueurs ont donné cette réponse (pour l’unicité)
+			isValid := nbVotes >= seuil && answer != "" && strings.HasPrefix(strings.ToUpper(answer), g.letter)
+			// Compter combien de joueurs ont donné cette réponse
 			count := 0
 			for _, ansMap := range g.answers {
-				if ansMap != nil && ansMap[catID] == answer && answer != "" {
+				if ansMap[catID] == answer && answer != "" {
 					count++
 				}
 			}
-
-			// Attribution des points
 			points := 0
-			if isValid && answer != "" {
+			if isValid {
 				if count == 1 {
 					points = 2
 				} else {
 					points = 1
 				}
 			}
-			// Sinon points = 0
-
-			// Ajoute le score
 			_ = AddScore(ctx, g.roomID, userID, points)
 		}
 	}
 
-	// Passage à la manche suivante ou fin de partie
 	if g.round >= g.totalRounds {
 		g.phase = "finished"
-		// Broadcast fin de partie, etc.
-	} else {
-		// Préparer la prochaine manche
-		g.round++
-		g.phase = "playing"
-		g.letter = randomLetter()
-		g.answers = map[int]map[int]string{}
-		g.votes = map[int]map[int]map[int]bool{}
-		g.endsAt = time.Now().Add(g.timePerRound)
-		g.timer = time.AfterFunc(g.timePerRound, func() {
-			g.onRoundEnd()
-		})
 		BroadcastRoomUpdated(g.roomID)
+		return
 	}
-}
 
-func countPlayersInRoom(roomID int) int {
-	players, _ := ListRoomPlayers(context.Background(), roomID)
-	return len(players)
+	// Manche suivante
+	g.round++
+	g.phase = "playing"
+	g.letter = randomLetter()
+	g.answers = map[int]map[int]string{}
+	g.votes = map[int]map[int]map[int]bool{}
+	g.endsAt = time.Now().Add(g.timePerRound)
+	g.timer = time.AfterFunc(g.timePerRound, func() {
+		g.onRoundEnd()
+	})
+	BroadcastRoomUpdated(g.roomID)
 }
 
 func (g *PetitBacGame) StateForUser(userID int) map[string]any {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	// Récupérer les catégories dynamiquement
 	categories, _ := ListPetitBacCategories(context.Background(), g.roomID)
-
-	// Récupérer les scores (à partir des joueurs de la room)
 	players, _ := ListRoomPlayers(context.Background(), g.roomID)
 	scores := map[int]int{}
 	for _, p := range players {
 		scores[p.UserID] = p.Score
+	}
+
+	var answers any
+	switch g.phase {
+	case "validation", "finished":
+		answers = g.answers
+	default:
+		if g.answers[userID] != nil {
+			answers = map[int]map[int]string{userID: g.answers[userID]}
+		} else {
+			answers = map[int]map[int]string{}
+		}
 	}
 
 	return map[string]any{
@@ -236,8 +236,14 @@ func (g *PetitBacGame) StateForUser(userID int) map[string]any {
 		"endsAt":      g.endsAt.Unix(),
 		"letter":      g.letter,
 		"categories":  categories,
-		"answers":     g.answers,
+		"answers":     answers,
 		"votes":       g.votes,
 		"scores":      scores,
+		"players":     players,
 	}
+}
+
+func countPlayersInRoom(roomID int) int {
+	players, _ := ListRoomPlayers(context.Background(), roomID)
+	return len(players)
 }

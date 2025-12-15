@@ -15,14 +15,7 @@
     <p id="round"></p>
 
     <form id="answersForm" class="form-grid" style="margin-top: 12px; display:none;">
-      <div id="categories">
-        {{range .Categories}}
-        <div class="form-group">
-          <label for="cat{{.ID}}">{{.Name}}</label>
-          <input type="text" id="cat{{.ID}}" name="cat{{.ID}}" autocomplete="off">
-        </div>
-        {{end}}
-      </div>
+      <div id="categories"></div>
       <div class="form-actions">
         <button type="submit">Valider mes réponses</button>
       </div>
@@ -39,7 +32,6 @@
       <h2>Scoreboard</h2>
       <ul id="scoreList" class="players-list"></ul>
       <div class="form-actions">
-        <button type="button" id="replayBtn">Rejouer</button>
         <form action="/salle/{{.Code}}/leave" method="post" style="display:inline;">
           <button type="submit">Quitter la salle</button>
         </form>

@@ -117,25 +117,7 @@ func APISalleHandler(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Aucune partie en cours.", http.StatusNotFound)
 				return
 			}
-			cats, _ := ListPetitBacCategories(r.Context(), room.ID)
-			players, _ := ListRoomPlayers(r.Context(), room.ID)
-			// Construction du scoreboard
-			scores := map[int]int{}
-			for _, p := range players {
-				scores[p.UserID] = p.Score
-			}
-			state := map[string]any{
-				"phase":       game.phase,
-				"round":       game.round,
-				"totalRounds": game.totalRounds,
-				"endsAt":      game.endsAt.Unix(),
-				"letter":      game.letter,
-				"categories":  cats,
-				"answers":     game.answers,
-				"votes":       game.votes,
-				"scores":      scores,
-			}
-			writeJSON(w, state)
+			writeJSON(w, game.StateForUser(userID))
 			return
 
 		case "answers":
@@ -193,4 +175,3 @@ func writeJSON(w http.ResponseWriter, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(v)
 }
-
