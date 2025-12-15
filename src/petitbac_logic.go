@@ -161,9 +161,11 @@ func (g *PetitBacGame) onValidationEnd() {
 			answer := userAnswers[catID]
 			// Compter les votes valides
 			nbVotes := 0
-			for _, valid := range g.votes[catID][userID] {
-				if valid {
-					nbVotes++
+			if g.votes[catID] != nil && g.votes[catID][userID] != nil {
+				for _, valid := range g.votes[catID][userID] {
+					if valid {
+						nbVotes++
+					}
 				}
 			}
 			seuil := (2*nbPlayers + 2) / 3
