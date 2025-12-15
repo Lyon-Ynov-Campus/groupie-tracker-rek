@@ -133,7 +133,7 @@ body > * {
     margin: 0 0 18px;
     font-size: clamp(1.6rem, 3vw, 2.2rem);
     letter-spacing: 0.8px;
-    background: linear-gradient(90deg, #fff7d6, #ffd54a 45%, #9bd3ff);
+    background: linear-gradient(90deg, #ffffff, #7c3aed 45%, #9bd3ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
