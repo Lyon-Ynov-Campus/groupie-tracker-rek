@@ -9,12 +9,17 @@
     try {
       const msg = JSON.parse(ev.data);
       if (msg.type === "room_updated") {
+        // léger rafraîchissement d'UI (animation possible avant reload)
         location.reload();
+        return;
       }
-      if (msg.type === "blindtest_round_started") {
+      // redirection client vers l'écran de jeu quand le serveur indique qu'une manche démarre
+      if (msg.type === "blindtest_round_started" || msg.type === "petitbac_round_started") {
         location.href = `/game/${encodeURIComponent(code)}`;
         return;
       }
-    } catch (_) {}
+    } catch (e) {
+      // ignore malformed messages
+    }
   };
 })();

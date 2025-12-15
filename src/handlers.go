@@ -341,7 +341,23 @@ func AfficherSalleHandler(w http.ResponseWriter, r *http.Request) {
 
 	// /salle/{code}/start
 	if len(parts) >= 2 && parts[1] == "start" {
-		StartBlindtestHandler(w, r, code)
+		room, err := GetRoomByCode(r.Context(), code)
+		if err != nil {
+			if errors.Is(err, ErrRoomNotFound) {
+				http.NotFound(w, r)
+				return
+			}
+			http.Error(w, "Erreur room.", http.StatusInternalServerError)
+			return
+		} 
+		switch room.Type {
+		case RoomTypeBlindTest:
+			StartBlindtestHandler(w, r, code)
+		case RoomTypePetitBac:
+			StartPetitBacHandler(w, r, code)
+		default:
+			http.Error(w, "Type de jeu inconnu.", http.StatusBadRequest)
+		}
 		return
 	}
 

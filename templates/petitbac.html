@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Petit Bac</title>
+  <link rel="stylesheet" href="/static/init_salle.css">
+</head>
+<body data-room-code="{{.Code}}">
+  <main class="card intro" style="max-width: 760px; margin: 40px auto;">
+    <h1>Saha le Bac !</h1>
+
+    <p id="status">Connexion…</p>
+    <p id="timer"></p>
+    <div id="letter"></div>
+    <p id="round"></p>
+
+    <form id="answersForm" class="form-grid" style="margin-top: 12px; display:none;">
+      <div id="categories">
+        {{range .Categories}}
+        <div class="form-group">
+          <label for="cat{{.ID}}">{{.Name}}</label>
+          <input type="text" id="cat{{.ID}}" name="cat{{.ID}}" autocomplete="off">
+        </div>
+        {{end}}
+      </div>
+      <div class="form-actions">
+        <button type="submit">Valider mes réponses</button>
+      </div>
+    </form>
+
+    <form id="votesForm" class="form-grid" style="margin-top: 12px; display:none;">
+      <div id="votes"></div>
+      <div class="form-actions">
+        <button type="submit">Valider les votes</button>
+      </div>
+    </form>
+
+    <section id="scoreboard" class="card" style="display:none; margin-top: 18px;">
+      <h2>Scoreboard</h2>
+      <ul id="scoreList" class="players-list"></ul>
+      <div class="form-actions">
+        <button type="button" id="replayBtn">Rejouer</button>
+        <form action="/salle/{{.Code}}/leave" method="post" style="display:inline;">
+          <button type="submit">Quitter la salle</button>
+        </form>
+      </div>
+    </section>
+
+    <div class="form-actions" style="margin-top: 12px;">
+      <a href="/salle/{{.Code}}" style="text-decoration:none;">
+        <button type="button">Retour salle</button>
+      </a>
+    </div>
+  </main>
+
+  <script src="/static/match_petitbac.js" defer></script>
+</body>
+</html>

@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	server "rek/src"
+	"strings" // AJOUTER
 )
 
 func main() {
@@ -24,11 +25,29 @@ func main() {
 	http.Handle("/salle-initialisation", server.RequireAuth(http.HandlerFunc(server.AfficherCreationSalleHandler)))
 	http.Handle("/creer-salle", server.RequireAuth(http.HandlerFunc(server.CreerSalleHandler)))
 	http.Handle("/rejoindre-salle", server.RequireAuth(http.HandlerFunc(server.RejoindreSalleHandler)))
-	http.Handle("/salle/", server.RequireAuth(http.HandlerFunc(server.AfficherSalleHandler)))
+	http.Handle("/salle/", server.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/start") && r.Method == http.MethodPost {
+			code := strings.TrimPrefix(strings.TrimSuffix(r.URL.Path, "/start"), "/salle/")
+			room, err := server.GetRoomByCode(r.Context(), code)
+			if err != nil {
+				http.NotFound(w, r)
+				return
+			}
+			switch room.Type {
+            case server.RoomTypeBlindTest:
+				server.StartBlindtestHandler(w, r, code)
+			case server.RoomTypePetitBac:
+				server.StartPetitBacHandler(w, r, code)
+			default:
+				http.Error(w, "Type de salle inconnu.", http.StatusBadRequest)
+			}
+			return
+		}
+		server.AfficherSalleHandler(w, r)
+	})))
 	http.Handle("/ws/salle/", server.RequireAuth(http.HandlerFunc(server.WSRoomHandler)))
 	http.Handle("/game/", server.RequireAuth(http.HandlerFunc(server.GameHandler)))
 	http.Handle("/api/salle/", server.RequireAuth(http.HandlerFunc(server.APISalleHandler)))
-
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	http.ListenAndServe(":8080", nil)
 }

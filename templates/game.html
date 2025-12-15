@@ -2,29 +2,37 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Blindtest</title>
+  <title>Petit Bac</title>
   <link rel="stylesheet" href="/static/init_salle.css">
 </head>
 <body data-room-code="{{.Code}}">
   <main class="card intro" style="max-width: 760px; margin: 40px auto;">
-    <h1>Find the Beat</h1>
+    <h1>Saha le Bac !</h1>
 
     <p id="status">Connexion…</p>
     <p id="timer"></p>
+    <div id="letter"></div>
 
-    <audio id="audio" preload="auto"></audio>
-
-    <form id="guessForm" class="form-grid" style="margin-top: 12px;">
-      <div class="form-group">
-        <label for="guess">Ta réponse (titre uniquement)</label>
-        <input type="text" id="guess" name="guess" required>
+    <form id="answersForm" class="form-grid" style="margin-top: 12px; display:none;">
+      <div id="categories">
+        {{range .Categories}}
+        <div class="form-group">
+          <label for="cat{{.ID}}">{{.Name}}</label>
+          <input type="text" id="cat{{.ID}}" name="cat{{.ID}}" autocomplete="off">
+        </div>
+        {{end}}
       </div>
       <div class="form-actions">
-        <button type="submit">Valider</button>
+        <button type="submit">Valider mes réponses</button>
       </div>
     </form>
 
-    <p id="reveal" style="margin-top: 12px;"></p>
+    <form id="votesForm" class="form-grid" style="margin-top: 12px; display:none;">
+      <div id="votes"></div>
+      <div class="form-actions">
+        <button type="submit">Valider les votes</button>
+      </div>
+    </form>
 
     <section id="scoreboard" class="card" style="display:none; margin-top: 18px;">
       <h2>Scoreboard</h2>
@@ -44,6 +52,6 @@
     </div>
   </main>
 
-  <script src="/static/match_script.js" defer></script>
+  <script src="/static/match_petitbac.js" defer></script>
 </body>
 </html>

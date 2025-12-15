@@ -116,12 +116,8 @@ const (
 
 	// Petit bac categories
 	SQLCountPetitBacCategoriesByRoomID = `SELECT COUNT(*) FROM room_petitbac_categories WHERE room_id = ?`
-	SQLListPetitBacCategoriesByRoomID  = `
-    SELECT id, name, position
-    FROM room_petitbac_categories
-    WHERE room_id = ?
-    ORDER BY position ASC
-`
+	SQLListPetitBacCategoriesByRoomID  = `SELECT id, name, position FROM room_petitbac_categories WHERE room_id = ? ORDER BY position ASC`
+	
 	SQLInsertPetitBacCategory = `INSERT INTO room_petitbac_categories (room_id, name, position) VALUES (?, ?, ?)`
 	SQLUpdatePetitBacCategory = `UPDATE room_petitbac_categories SET name = ? WHERE id = ? AND room_id = ?`
 	SQLDeletePetitBacCategory = `DELETE FROM room_petitbac_categories WHERE id = ? AND room_id = ?`

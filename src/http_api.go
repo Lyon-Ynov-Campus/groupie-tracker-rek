@@ -63,52 +63,134 @@ func APISalleHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	if parts[1] != "blindtest" {
-		http.NotFound(w, r)
-		return
+
+	if parts[1] == "blindtest" {
+		switch parts[2] {
+		case "state":
+			if r.Method != http.MethodGet {
+				http.Error(w, "Méthode non autorisée.", http.StatusMethodNotAllowed)
+				return
+			}
+			game, ok := GetBlindtestGame(room.ID)
+			if !ok {
+				writeJSON(w, map[string]any{"phase": "idle"})
+				return
+			}
+			writeJSON(w, game.StateForUser(userID))
+			return
+
+		case "guess":
+			if r.Method != http.MethodPost {
+				http.Error(w, "Méthode non autorisée.", http.StatusMethodNotAllowed)
+				return
+			}
+			game, ok := GetBlindtestGame(room.ID)
+			if !ok {
+				writeJSON(w, map[string]any{"locked": true})
+				return
+			}
+
+			var body struct {
+				Guess string `json:"guess"`
+			}
+			_ = json.NewDecoder(r.Body).Decode(&body)
+
+			res, _ := game.SubmitGuess(r.Context(), room.ID, userID, body.Guess)
+			writeJSON(w, res)
+			return
+
+		default:
+			http.NotFound(w, r)
+			return
+		}
 	}
 
-	switch parts[2] {
-	case "state":
-		if r.Method != http.MethodGet {
-			http.Error(w, "Méthode non autorisée.", http.StatusMethodNotAllowed)
+	if parts[1] == "petitbac" {
+		switch parts[2] {
+		case "state":
+			if r.Method != http.MethodGet {
+				http.Error(w, "Méthode non autorisée.", http.StatusMethodNotAllowed)
+				return
+			}
+			game, ok := petitBacGames[room.ID]
+			if !ok {
+				http.Error(w, "Aucune partie en cours.", http.StatusNotFound)
+				return
+			}
+			cats, _ := ListPetitBacCategories(r.Context(), room.ID)
+			players, _ := ListRoomPlayers(r.Context(), room.ID)
+			// Construction du scoreboard
+			scores := map[int]int{}
+			for _, p := range players {
+				scores[p.UserID] = p.Score
+			}
+			state := map[string]any{
+				"phase":       game.phase,
+				"round":       game.round,
+				"totalRounds": game.totalRounds,
+				"endsAt":      game.endsAt.Unix(),
+				"letter":      game.letter,
+				"categories":  cats,
+				"answers":     game.answers,
+				"votes":       game.votes,
+				"scores":      scores,
+			}
+			writeJSON(w, state)
+			return
+
+		case "answers":
+			if r.Method != http.MethodPost {
+				http.Error(w, "Méthode non autorisée.", http.StatusMethodNotAllowed)
+				return
+			}
+			var req map[int]string
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				http.Error(w, "Requête invalide.", http.StatusBadRequest)
+				return
+			}
+			game, ok := petitBacGames[room.ID]
+			if !ok {
+				http.Error(w, "Aucune partie en cours.", http.StatusNotFound)
+				return
+			}
+			if err := game.SubmitAnswers(userID, req); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			BroadcastRoomUpdated(room.ID)
+			writeJSON(w, map[string]string{"status": "ok"})
+			return
+
+		case "votes":
+			if r.Method != http.MethodPost {
+				http.Error(w, "Méthode non autorisée.", http.StatusMethodNotAllowed)
+				return
+			}
+			var req map[int]map[int]bool
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				http.Error(w, "Requête invalide.", http.StatusBadRequest)
+				return
+			}
+			game, ok := petitBacGames[room.ID]
+			if !ok {
+				http.Error(w, "Aucune partie en cours.", http.StatusNotFound)
+				return
+			}
+			if err := game.SubmitVotes(userID, req); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			BroadcastRoomUpdated(room.ID)
+			writeJSON(w, map[string]string{"status": "ok"})
 			return
 		}
-		game, ok := GetBlindtestGame(room.ID)
-		if !ok {
-			writeJSON(w, map[string]any{"phase": "idle"})
-			return
-		}
-		writeJSON(w, game.StateForUser(userID))
-		return
-
-	case "guess":
-		if r.Method != http.MethodPost {
-			http.Error(w, "Méthode non autorisée.", http.StatusMethodNotAllowed)
-			return
-		}
-		game, ok := GetBlindtestGame(room.ID)
-		if !ok {
-			writeJSON(w, map[string]any{"locked": true})
-			return
-		}
-
-		var body struct {
-			Guess string `json:"guess"`
-		}
-		_ = json.NewDecoder(r.Body).Decode(&body)
-
-		res, _ := game.SubmitGuess(r.Context(), room.ID, userID, body.Guess)
-		writeJSON(w, res)
-		return
-
-	default:
-		http.NotFound(w, r)
-		return
 	}
+
+	http.NotFound(w, r)
 }
 
 func writeJSON(w http.ResponseWriter, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(v)
 }
+
