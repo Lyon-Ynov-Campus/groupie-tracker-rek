@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 	server "rek/src"
-	"strings" // AJOUTER
+	"strings" 
 )
 
 func main() {
@@ -25,6 +25,9 @@ func main() {
 	http.Handle("/salle-initialisation", server.RequireAuth(http.HandlerFunc(server.AfficherCreationSalleHandler)))
 	http.Handle("/creer-salle", server.RequireAuth(http.HandlerFunc(server.CreerSalleHandler)))
 	http.Handle("/rejoindre-salle", server.RequireAuth(http.HandlerFunc(server.RejoindreSalleHandler)))
+	http.Handle("/api/salle/", server.RequireAuth(http.HandlerFunc(server.APISalleHandler)))
+	http.Handle("/ws/salle/", server.RequireAuth(http.HandlerFunc(server.WSRoomHandler)))
+	http.Handle("/game/", server.RequireAuth(http.HandlerFunc(server.GameHandler)))
 	http.Handle("/salle/", server.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/start") && r.Method == http.MethodPost {
 			code := strings.TrimPrefix(strings.TrimSuffix(r.URL.Path, "/start"), "/salle/")
@@ -33,9 +36,6 @@ func main() {
 		}
 		server.AfficherSalleHandler(w, r)
 	})))
-	http.Handle("/ws/salle/", server.RequireAuth(http.HandlerFunc(server.WSRoomHandler)))
-	http.Handle("/game/", server.RequireAuth(http.HandlerFunc(server.GameHandler)))
-	http.Handle("/api/salle/", server.RequireAuth(http.HandlerFunc(server.APISalleHandler)))
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	http.ListenAndServe(":8080", nil)
 }
