@@ -28,19 +28,7 @@ func main() {
 	http.Handle("/salle/", server.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/start") && r.Method == http.MethodPost {
 			code := strings.TrimPrefix(strings.TrimSuffix(r.URL.Path, "/start"), "/salle/")
-			room, err := server.GetRoomByCode(r.Context(), code)
-			if err != nil {
-				http.NotFound(w, r)
-				return
-			}
-			switch room.Type {
-            case server.RoomTypeBlindTest:
-				server.StartBlindtestHandler(w, r, code)
-			case server.RoomTypePetitBac:
-				server.StartPetitBacHandler(w, r, code)
-			default:
-				http.Error(w, "Type de salle inconnu.", http.StatusBadRequest)
-			}
+			server.StartGameHandler(w, r, code)
 			return
 		}
 		server.AfficherSalleHandler(w, r)

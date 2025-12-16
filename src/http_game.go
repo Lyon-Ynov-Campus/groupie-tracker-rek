@@ -92,6 +92,22 @@ func StartPetitBacHandler(w http.ResponseWriter, r *http.Request, code string) {
 	http.Redirect(w, r, "/game/"+room.Code, http.StatusSeeOther)
 }
 
+func StartGameHandler(w http.ResponseWriter, r *http.Request, code string) {
+	room, err := GetRoomByCode(r.Context(), code)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	switch room.Type {
+	case RoomTypeBlindTest:
+		StartBlindtestHandler(w, r, code)
+	case RoomTypePetitBac:
+		StartPetitBacHandler(w, r, code)
+	default:
+		http.Error(w, "Type de jeu inconnu.", http.StatusBadRequest)
+	}
+}
+
 func GameHandler(w http.ResponseWriter, r *http.Request) {
 	code := strings.TrimPrefix(r.URL.Path, "/game/")
 	code = strings.Trim(code, "/")
