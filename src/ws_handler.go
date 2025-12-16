@@ -86,7 +86,7 @@ func WSRoomHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	})
 
-	go client.writePump(hub)
+	go func() { client.writePump() }()
 	client.readPump(hub)
 }
 
@@ -112,7 +112,7 @@ func (c *WSClient) readPump(hub *RoomHub) {
 	}
 }
 
-func (c *WSClient) writePump(hub *RoomHub) {
+func (c *WSClient) writePump() {
 	ticker := time.NewTicker(wsPingPeriod)
 	defer func() {
 		ticker.Stop()
