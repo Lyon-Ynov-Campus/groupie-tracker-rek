@@ -1,451 +1,207 @@
-# 🎮 Groupie Tracker - Application de Jeux Multijoueurs
+# Groupie Tracker - Jeu Multijoueur
 
-## 📋 Table des matières
-- [Vue d'ensemble](#vue-densemble)
-- [Fonctionnalités](#fonctionnalités)
-- [Architecture du projet](#architecture-du-projet)
-- [Prérequis](#prérequis)
-- [Installation](#installation)
-- [Lancement de l'application](#lancement-de-lapplication)
-- [Utilisation](#utilisation)
-- [Structure du code](#structure-du-code)
-- [Routes API](#routes-api)
-- [Technologies utilisées](#technologies-utilisées)
-- [Dépannage](#dépannage)
+Salut ! C'est mon projet de jeux en ligne. J'ai fait ça pour apprendre Go et faire jouer mes potes ensemble.
 
----
+## C'est quoi ?
 
-## 🎯 Vue d'ensemble
+C'est un site web où tu peux jouer à des jeux avec tes amis :
+- Un blindtest (devine la musique)
+- Un petit bac (pas encore fini lol)
 
-**Groupie Tracker** est une application web multijoueurs en temps réel permettant de jouer à différents jeux :
-- 🎵 **Blindtest musical** (devinez les chansons)
-- 📝 **Petit Bac** (trouvez des mots par catégorie)
+Tu crées une salle, tu donnes le code à tes potes et vous jouez ensemble !
 
-L'application permet aux utilisateurs de créer des salles de jeu, d'inviter des amis via un code, et de jouer ensemble en temps réel grâce aux WebSockets.
+## Comment ça marche ?
 
----
+### Ce qu'il faut avoir sur ton PC
 
-## ✨ Fonctionnalités
+Tu dois installer Go. Va sur https://go.dev/dl/ et télécharge la version pour ton système.
 
-### 🔐 Authentification
-- ✅ Inscription avec email et mot de passe
-- ✅ Connexion sécurisée
-- ✅ Sessions persistantes avec cookies
-- ✅ Déconnexion
-
-### 🎮 Gestion des salles
-- ✅ Création de salle privée avec code unique
-- ✅ Rejoindre une salle via code
-- ✅ Configuration de la salle (type de jeu, paramètres)
-- ✅ Liste des joueurs en temps réel
-- ✅ Démarrage de partie par le créateur
-
-### 🎵 Blindtest Musical
-- ✅ Écoute d'extraits musicaux
-- ✅ Devinez le titre de la chanson
-- ✅ Système de points
-- ✅ Timer pour chaque manche
-- ✅ Classement en fin de partie
-
-### 📝 Petit Bac (prévu)
-- 🔄 Jeu de mots par catégorie
-- 🔄 Rounds chronométrés
-- 🔄 Système de validation
-
----
-
-## 🏗️ Architecture du projet
-
-```
-groupie-tracker-rek/
-├── main.go                 # Point d'entrée, configuration des routes
-├── rek.db                  # Base de données SQLite (créée automatiquement)
-│
-├── src/                    # Code source backend (package server)
-│   ├── handlers.go         # Handlers HTTP principaux (accueil, auth)
-│   ├── database.go         # Initialisation et gestion de la DB
-│   ├── security.go         # Middleware d'authentification
-│   ├── user.go             # Logique utilisateur
-│   ├── createroom.go       # Création de salles
-│   ├── http_game.go        # Handlers de jeu
-│   ├── http_api.go         # API REST pour les salles
-│   ├── ws_handler.go       # Gestion des WebSockets
-│   ├── ws_hub.go           # Hub de connexions WebSocket
-│   ├── ws_types.go         # Types pour WebSocket
-│   ├── blindtest_match.go  # Logique du blindtest
-│   ├── blindtest_runtime.go # Exécution du blindtest
-│   ├── blindtest_deezer_genre.go # Intégration API Deezer
-│   ├── petitbac_logic.go   # Logique du Petit Bac
-│   ├── gameconfig.go       # Configuration des jeux
-│   ├── membre.go           # Gestion des membres de salle
-│   ├── score.go            # Calcul et gestion des scores
-│   ├── query.go            # Requêtes SQL
-│   └── render.go           # Rendu des templates HTML
-│
-├── templates/              # Templates HTML
-│   ├── accueil.html        # Page d'accueil
-│   ├── authentification.html # Page de connexion/inscription
-│   ├── landingpage.html    # Dashboard après connexion
-│   ├── init_room.html      # Création de salle
-│   ├── salle.html          # Salle d'attente
-│   ├── config_salle.html   # Configuration de salle
-│   ├── game.html           # Interface blindtest
-│   └── petitbac.html       # Interface petit bac
-│
-└── static/                 # Fichiers statiques
-    ├── styles.css          # CSS global
-    ├── init_salle.css      # CSS pour les salles/jeux
-    ├── landingpage.css     # CSS du dashboard
-    ├── ws_room.js          # WebSocket salle d'attente
-    ├── match_script.js     # Logique blindtest client
-    └── match_petitbac.js   # Logique petit bac client
-```
-
----
-
-## 🔧 Prérequis
-
-Avant de commencer, assurez-vous d'avoir installé :
-
-### 1. **Go (Golang)**
-- Version minimale : **Go 1.19+**
-- Téléchargement : https://go.dev/dl/
-
-Vérifiez l'installation :
+Pour vérifier que c'est bon :
 ```bash
 go version
 ```
 
-### 2. **Git** (optionnel, pour cloner le projet)
-```bash
-git --version
-```
+Si ça affiche un truc comme "go version 1.21" c'est bon.
 
-### 3. **Un navigateur web moderne**
-- Chrome, Firefox, Edge, Safari (version récente)
+### Installation
 
----
-
-## 📥 Installation
-
-### Étape 1 : Cloner ou télécharger le projet
-
-**Option A : Avec Git**
-```bash
-git clone <url-du-repo>
-cd groupie-tracker-rek
-```
-
-**Option B : Sans Git**
-1. Téléchargez le ZIP du projet
-2. Extrayez-le dans un dossier
-3. Ouvrez un terminal dans ce dossier
-
-### Étape 2 : Installer les dépendances Go
+1. Télécharge le projet (ou clone le si tu connais git)
+2. Ouvre un terminal dans le dossier
+3. Lance cette commande :
 
 ```bash
 go mod download
 ```
 
-Si le fichier `go.mod` n'existe pas, créez-le :
+Si ça marche pas, essaye :
 ```bash
 go mod init rek
 go mod tidy
 ```
 
-### Étape 3 : Vérifier les dépendances requises
+### Lancer le serveur
 
-Le projet utilise :
-- `github.com/gorilla/websocket` (WebSockets)
-- `github.com/mattn/go-sqlite3` (base de données)
-- `golang.org/x/crypto/bcrypt` (hashage des mots de passe)
-
-Ces dépendances s'installent automatiquement avec `go mod download`.
-
----
-
-## 🚀 Lancement de l'application
-
-### Démarrage du serveur
+Dans le terminal, tape juste :
 
 ```bash
 go run main.go
 ```
 
-Vous devriez voir :
+Tu devrais voir :
 ```
 Base de données initialisée avec succès.
-Serveur démarré sur :8080
 ```
 
-### Accéder à l'application
+Après ouvre ton navigateur et va sur : `http://localhost:8080`
 
-Ouvrez votre navigateur et allez sur :
+## Comment jouer
+
+### Créer un compte
+
+1. Clique sur "S'inscrire"
+2. Mets un nom, un email et un mot de passe
+3. Clique sur créer
+
+### Se connecter
+
+1. Clique sur "Se connecter"
+2. Tape ton email et mot de passe
+3. Tu arrives sur le tableau de bord
+
+### Créer une partie
+
+1. Clique sur "Créer une salle"
+2. Choisis le jeu (pour l'instant y'a que le blindtest qui marche bien)
+3. Note le code qui s'affiche (genre ABC123)
+4. Donne ce code à tes amis
+
+### Rejoindre une partie
+
+1. Ton pote te donne un code
+2. Clique sur "Rejoindre une salle"
+3. Entre le code
+4. Attend que le créateur lance la partie
+
+### Jouer au Blindtest
+
+1. La musique démarre automatiquement
+2. Tu as 30 secondes pour deviner le titre
+3. Tape juste le titre (pas l'artiste)
+4. Clique sur valider
+5. À la fin tu vois les scores
+
+## Organisation des fichiers
+
 ```
-http://localhost:8080
-```
-
----
-
-## 📖 Utilisation
-
-### 1️⃣ **Créer un compte**
-
-1. Sur la page d'accueil, cliquez sur **"S'inscrire"**
-2. Remplissez le formulaire :
-   - Nom d'utilisateur
-   - Email
-   - Mot de passe
-3. Cliquez sur **"Créer un compte"**
-
-### 2️⃣ **Se connecter**
-
-1. Cliquez sur **"Se connecter"**
-2. Entrez vos identifiants
-3. Vous êtes redirigé vers le **Dashboard**
-
-### 3️⃣ **Créer une salle de jeu**
-
-1. Sur le dashboard, cliquez sur **"Créer une salle"**
-2. Choisissez le type de jeu :
-   - 🎵 Blindtest
-   - 📝 Petit Bac
-3. Configurez les paramètres (nombre de manches, durée, etc.)
-4. Cliquez sur **"Créer"**
-5. **Notez le code de la salle** (ex: `ABC123`)
-
-### 4️⃣ **Rejoindre une salle**
-
-1. Sur le dashboard, cliquez sur **"Rejoindre une salle"**
-2. Entrez le **code de la salle** reçu
-3. Cliquez sur **"Rejoindre"**
-
-### 5️⃣ **Jouer au Blindtest**
-
-1. Dans la salle d'attente, attendez que le créateur clique sur **"Démarrer la partie"**
-2. Une fois le jeu lancé :
-   - 🎵 Écoutez l'extrait musical
-   - ⏱️ Vous avez 30 secondes par manche
-   - ✍️ Tapez le **titre de la chanson** dans le champ
-   - ✅ Validez votre réponse
-3. À la fin, consultez le **classement final**
-
-### 6️⃣ **Quitter/Rejouer**
-
-- **Rejouer** : Cliquez sur "Rejouer" pour une nouvelle partie
-- **Quitter** : Cliquez sur "Quitter la salle" ou "Retour salle"
-- **Déconnexion** : Cliquez sur "Se déconnecter" dans le dashboard
-
----
-
-## 🔍 Structure du code
-
-### Backend (Go)
-
-#### **main.go**
-Point d'entrée qui :
-- Initialise la base de données SQLite
-- Configure toutes les routes HTTP
-- Démarre le serveur sur le port `:8080`
-
-#### **src/handlers.go**
-Handlers principaux :
-- `HomeHandler` : Page d'accueil
-- `RegisterHandler` : Inscription
-- `LoginHandler` : Connexion
-- `LogoutHandler` : Déconnexion
-- `LandingPageHandler` : Dashboard
-
-#### **src/security.go**
-- `RequireAuth()` : Middleware vérifiant l'authentification
-- Gestion des sessions via cookies
-
-#### **src/createroom.go**
-- `CreerSalleHandler` : Crée une salle avec code unique
-- `RejoindreSalleHandler` : Rejoint une salle existante
-- `AfficherSalleHandler` : Affiche la salle d'attente
-
-#### **src/ws_handler.go & ws_hub.go**
-- Gestion des WebSockets en temps réel
-- Broadcast des messages aux joueurs connectés
-- Synchronisation de l'état de la salle
-
-#### **src/blindtest_*.go**
-- `blindtest_match.go` : Structure d'une partie
-- `blindtest_runtime.go` : Exécution du jeu
-- `blindtest_deezer_genre.go` : Récupération de musiques via API Deezer
-
-#### **src/database.go**
-Tables SQL :
-```sql
-- users (id, username, email, password_hash)
-- sessions (token, user_id, expires_at)
-- salles (code, creator_id, game_type, config)
-- membres (salle_code, user_id, score)
-- blindtest_matches (id, salle_code, state)
+groupie-tracker-rek/
+├── main.go              # Le fichier principal qui lance tout
+├── rek.db               # La base de données (se crée tout seul)
+├── src/                 # Tout le code du serveur
+├── templates/           # Les pages HTML
+└── static/              # Les CSS et JavaScript
 ```
 
-### Frontend (HTML/JS/CSS)
+### Les fichiers importants
 
-#### **Templates HTML**
-- Utilisation de `html/template` de Go
-- Variables injectées : `{{.Username}}`, `{{.Code}}`, etc.
+- `main.go` : C'est là que tout commence
+- `src/handlers.go` : Gère les pages (accueil, connexion, etc)
+- `src/createroom.go` : Pour créer et rejoindre les salles
+- `src/blindtest_match.go` : La logique du blindtest
+- `src/ws_handler.go` : Les websockets (pour le temps réel)
+- `templates/game.html` : La page du jeu
+- `static/match_script.js` : Le JavaScript du blindtest
 
-#### **JavaScript**
-- `ws_room.js` : WebSocket pour la salle d'attente
-- `match_script.js` : Logique du blindtest côté client
-- `match_petitbac.js` : Logique du petit bac
+## Les routes (URLs)
 
----
+### Pages publiques
+- `/` : Page d'accueil
+- `/connexion` : Se connecter
+- `/register` : S'inscrire
 
-## 🛣️ Routes API
+### Pages privées (faut être connecté)
+- `/dashboard` : Tableau de bord
+- `/salle-initialisation` : Créer une salle
+- `/rejoindre-salle` : Rejoindre une salle
+- `/salle/{code}` : La salle d'attente
+- `/game/{code}` : Le jeu
 
-### Routes publiques
-```
-GET  /                    → Page d'accueil
-GET  /connexion           → Page de connexion
-POST /login               → Traitement connexion
-GET  /register            → Page d'inscription
-POST /register            → Traitement inscription
-GET  /static/*            → Fichiers CSS/JS
-```
+## Technologies
 
-### Routes authentifiées (nécessitent connexion)
-```
-GET  /dashboard           → Dashboard utilisateur
-GET  /logout              → Déconnexion
+J'ai utilisé :
+- Go pour le backend
+- SQLite pour la base de données (c'est simple)
+- WebSocket pour le temps réel
+- HTML/CSS/JavaScript basique pour le front
 
-GET  /salle-initialisation → Formulaire création salle
-POST /creer-salle         → Créer une salle
-POST /rejoindre-salle     → Rejoindre une salle
+## Si ça marche pas
 
-GET  /salle/{code}        → Salle d'attente
-POST /salle/{code}/start  → Démarrer la partie
-POST /salle/{code}/leave  → Quitter la salle
-
-GET  /game/{code}         → Interface de jeu
-GET  /api/salle/{code}    → API REST infos salle
-WS   /ws/salle/{code}     → WebSocket salle
-```
-
----
-
-## 🛠️ Technologies utilisées
-
-### Backend
-- **Go 1.19+** : Langage serveur
-- **net/http** : Serveur HTTP natif
-- **SQLite3** : Base de données embarquée
-- **gorilla/websocket** : WebSockets en temps réel
-- **bcrypt** : Hashage sécurisé des mots de passe
-
-### Frontend
-- **HTML5** : Structure des pages
-- **CSS3** : Mise en forme
-- **JavaScript ES6+** : Logique client
-- **WebSocket API** : Communication temps réel
-
-### APIs externes
-- **Deezer API** : Récupération de musiques pour le blindtest
-
----
-
-## 🐛 Dépannage
-
-### ❌ Erreur : `cannot find package`
+### Erreur "cannot find package"
 ```bash
 go mod download
 go mod tidy
 ```
 
-### ❌ Port 8080 déjà utilisé
-Modifiez dans `main.go` :
+### Le port 8080 est déjà utilisé
+Ouvre `main.go` et change la dernière ligne :
 ```go
-http.ListenAndServe(":3000", nil) // Changez le port
+http.ListenAndServe(":3000", nil) // Change le 8080 en 3000
 ```
 
-### ❌ Base de données verrouillée
+### La base de données est buguée
+Supprime le fichier `rek.db` et relance :
 ```bash
 rm rek.db
-go run main.go  # Recrée la DB
+go run main.go
 ```
 
-### ❌ WebSocket déconnecté
-- Vérifiez que JavaScript est activé
-- Vérifiez la console du navigateur (F12)
-- Rafraîchissez la page (F5)
+### Le WebSocket se déconnecte
+Rafraîchis la page (F5). Sinon regarde dans la console du navigateur (F12) pour voir l'erreur.
 
-### ❌ "Échec d'authentification"
-- Supprimez les cookies du site
-- Reconnectez-vous
+### Pas de son dans le blindtest
+- Vérifie ta connexion internet
+- Autorise le son dans ton navigateur
+- Des fois l'API Deezer bug, relance la partie
 
-### ❌ Musique ne joue pas (Blindtest)
-- Vérifiez votre connexion internet (API Deezer)
-- Autorisez le son dans votre navigateur
-- Vérifiez que l'API Deezer est accessible
+## Trucs qui marchent pas encore
 
----
+- Le bouton "Quitter" dans le jeu marche pas (j'ai oublié de faire la route)
+- Le petit bac est pas terminé
+- Des fois les routes bugent entre elles (je sais pas trop pourquoi)
+- La base de données est pas bien partagée entre les fonctions (je corrigerai)
 
-## 📝 Notes importantes
+## Ce que je veux ajouter
 
-### ⚠️ Problèmes connus
+- Finir le petit bac
+- Corriger le bouton quitter
+- Faire un chat dans les salles
+- Ajouter des avatars
+- Faire un classement général
+- Rendre ça plus joli sur mobile
 
-1. **Route `/salle/{code}/leave` manquante** dans `main.go`
-   - Le bouton "Quitter" dans `game.html` ne fonctionne pas actuellement
-   - **Solution temporaire** : Utilisez "Retour salle" ou fermez l'onglet
+## Bugs connus
 
-2. **Base de données non partagée entre handlers**
-   - La variable `db` n'est pas accessible dans les handlers
-   - Fonctionnera uniquement si `InitDB()` stocke `db` globalement dans le package `server`
+1. Si tu quittes la page pendant le jeu, ça bug un peu
+2. Parfois les scores s'affichent en double (j'ai pas compris pourquoi)
+3. Le timer peut décaler entre les joueurs
+4. Si tu rafraîchis pendant une partie, t'es éjecté
 
-3. **Ordre des routes**
-   - Les routes `/api/salle/` et `/ws/salle/` peuvent ne jamais être atteintes
-   - `/salle/` capture toutes les requêtes commençant par `/salle/`
+## Notes
 
-### 🔒 Sécurité
+- Les mots de passe sont chiffrés (bcrypt)
+- J'ai fait ça en quelques semaines pour apprendre
+- C'est pas parfait mais ça marche plutôt bien
+- N'hésite pas à me dire si tu trouves des bugs
 
-- ✅ Mots de passe hashés avec bcrypt
-- ✅ Sessions sécurisées avec tokens
-- ⚠️ Pas de HTTPS (à activer en production)
-- ⚠️ Pas de rate limiting (à implémenter)
+## Aide
 
-### 🚀 Améliorations futures
-
-- [ ] Corriger la route `/salle/{code}/leave`
-- [ ] Implémenter le jeu Petit Bac complet
-- [ ] Ajouter des avatars utilisateurs
-- [ ] Historique des parties jouées
-- [ ] Classement global
-- [ ] Chat dans les salles
-- [ ] Support mobile optimisé
+Si t'as un problème :
+1. Regarde les erreurs dans le terminal
+2. Ouvre la console du navigateur (F12)
+3. Essaye de redémarrer le serveur
+4. Vérifie que t'es bien connecté à internet
 
 ---
 
-## 👥 Contribution
+Fait avec ❤️ pour apprendre Go
 
-Pour contribuer au projet :
-1. Forkez le repository
-2. Créez une branche (`git checkout -b feature/amelioration`)
-3. Committez vos changements (`git commit -m 'Ajout fonctionnalité'`)
-4. Pushez (`git push origin feature/amelioration`)
-5. Ouvrez une Pull Request
-
----
-
-## 📄 Licence
-
-Ce projet est un projet éducatif. Tous droits réservés.
-
----
-
-## 📞 Support
-
-En cas de problème :
-1. Vérifiez la section [Dépannage](#dépannage)
-2. Consultez les logs du serveur dans le terminal
-3. Vérifiez la console du navigateur (F12 → Console)
-4. Contactez l'équipe de développement
-
----
-
-**Bon jeu ! 🎮🎵**
+PS : C'est mon premier gros projet en Go alors soyez indulgents ! 😅
