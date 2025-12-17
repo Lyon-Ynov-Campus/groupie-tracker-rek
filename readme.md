@@ -174,6 +174,7 @@ Tu veux comprendre ou modifier un truc ?
 
 - Nous avons utilisé l'IA, pour nous aider sur la compréhension de certains sujets (Certains pas vu en cours, d'autre fraîchement acquis.)
 - Assistance IA : CSS et JS
+- JS  utilisé un peu coté petit bac pour la validatition des choix et vote 
 
 ## 🙏 Remerciements
 

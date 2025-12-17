@@ -1,5 +1,4 @@
 const roomCode = document.body.dataset.roomCode;
-// DOM Elements
 const statusEl = document.getElementById('status');
 const timerEl = document.getElementById('timer');
 const letterEl = document.getElementById('letter');
@@ -13,17 +12,15 @@ const scoreList = document.getElementById('scoreList');
 
 let ws;
 let state = null;
-let debounceTimer = null; // Pour l'auto-save
+let debounceTimer = null; 
 
-// Mémoire locale pour l'interface
 let localAnswers = {}; 
 let localVotes = {};   
 
-// Variables de suivi pour le rendu
 let renderedRound = -1;
 let renderedPhase = null;
+let renderedVoteRound = -1; 
 
-// --- GESTION ÉTAT ---
 
 function fetchState() {
   fetch(`/api/salle/${roomCode}/petitbac/state`)
@@ -72,18 +69,15 @@ function handlePhaseDisplay() {
     else if (state.phase === "finished") statusEl.textContent = "Partie terminée !";
     else statusEl.textContent = "En attente...";
 
-    // Sauvegarde forcée au changement de phase
     if (state.phase !== "playing" && Object.keys(localAnswers).length > 0) {
       sendAnswers(); 
     }
   }
 }
 
-// --- LOGIQUE INPUTS (FIX FOCUS + AUTO-SAVE) ---
 
 function renderCategoriesOnce() {
-  // 1. Protection absolue contre le re-render
-  // Si on a déjà des inputs et que c'est la même manche, ON STOPPE TOUT.
+
   if (renderedRound === state.round && categoriesDiv.children.length > 0) {
     return; 
   }
@@ -93,14 +87,12 @@ function renderCategoriesOnce() {
   categoriesDiv.innerHTML = ""; 
   localAnswers = {}; 
 
-  // Récupérer les réponses que le serveur connaît déjà (utile après un refresh page)
   const serverAnswers = (state.answers && state.answers[state.players.find(p => p.UserID === state.userID)?.UserID]) || {};
-  // Note: Dans ta structure Go, StateForUser renvoie 'answers' qui contient TA réponse à toi.
-  // Adapte ici selon la structure exacte du JSON reçu, mais généralement :
+
   const myAnswers = (state.answers && state.answers[state.userID]) ? state.answers[state.userID] : {};
 
   state.categories.forEach(cat => {
-    // Priorité : ce qu'on a en mémoire > serveur > vide
+
     const val = localAnswers[cat.ID] || myAnswers[cat.ID] || "";
     localAnswers[cat.ID] = val; 
 
@@ -118,7 +110,7 @@ function renderCategoriesOnce() {
     input.value = val;
     input.autocomplete = "off";
 
-    // AUTO-SAVE : Quand on tape, on met à jour localAnswers et on lance un timer
+  
     input.addEventListener('input', (e) => {
       localAnswers[cat.ID] = e.target.value;
       triggerAutoSave();
@@ -135,18 +127,22 @@ function triggerAutoSave() {
   debounceTimer = setTimeout(() => {
     console.log("Auto-save...");
     sendAnswers();
-  }, 2000); // Sauvegarde auto toutes les 2 secondes d'inactivité
+  }, 2000); 
 }
 
-// --- LOGIQUE VOTES (FIX PERSISTANCE) ---
 
 function renderVotesSmart() {
   if (!state.categories || !state.players || !state.answers) return;
+  if (renderedVoteRound !== state.round) {
+    console.log("Nouvelle manche de vote détectée (" + state.round + "). Nettoyage.");
+    votesDiv.innerHTML = ""; 
+    localVotes = {};        
+    renderedVoteRound = state.round;
+  }
 
   state.players.forEach(player => {
-    if (player.UserID === state.userID) return; // On ne vote pas pour soi
+    if (player.UserID === state.userID) return; 
     
-    // Vérifier si le joueur a des réponses
     const playerAnswers = state.answers[player.UserID];
     if (!playerAnswers) return;
 
@@ -162,28 +158,24 @@ function renderVotesSmart() {
 
     state.categories.forEach(cat => {
       const answerText = playerAnswers[cat.ID];
-      // On n'affiche pas les réponses vides
       if (!answerText) return;
 
       const uniqueID = `vote_${player.UserID}_${cat.ID}`;
       let voteRow = document.getElementById(`row_${uniqueID}`);
 
-      // --- RECUPERATION DE LA VALEUR ACTUELLE DU VOTE ---
-      // 1. Regarder si on a une action locale en attente
       let currentVal = localVotes[`${player.UserID}__${cat.ID}`];
       
-      // 2. Sinon, regarder ce que le serveur a enregistré (si dispo)
-      // Structure Go : votes[catID][targetUserID][voterID] => bool
+     
       if (currentVal === undefined && state.votes && state.votes[cat.ID] && state.votes[cat.ID][player.UserID]) {
          const serverBool = state.votes[cat.ID][player.UserID][state.userID];
          if (serverBool === true) currentVal = "1";
          else if (serverBool === false) currentVal = "0";
       }
 
-      if (currentVal === undefined) currentVal = ""; // Valeur par défaut
+      if (currentVal === undefined) currentVal = ""; 
 
       if (!voteRow) {
-        // Création
+       
         voteRow = document.createElement('div');
         voteRow.className = "form-group";
         voteRow.id = `row_${uniqueID}`;
@@ -201,18 +193,14 @@ function renderVotesSmart() {
         fieldset.appendChild(voteRow);
 
         const select = voteRow.querySelector('select');
-        select.value = currentVal; // Appliquer la valeur
+        select.value = currentVal; 
         
         select.addEventListener('change', (e) => {
            const key = `${player.UserID}__${cat.ID}`;
            localVotes[key] = e.target.value;
-           // Envoi immédiat du vote pour fluidité (optionnel, mais mieux)
-           // sendVotes(); 
         });
       } else {
-        // MISE A JOUR : Si l'élément existe, on vérifie si on doit mettre à jour la sélection
-        // On le fait seulement si l'utilisateur n'est pas en train d'interagir avec (compliqué à détecter)
-        // ou simplement, on force la valeur si elle vient du serveur pour confirmer
+     
         const select = voteRow.querySelector('select');
         if (select.value === "" && currentVal !== "") {
             select.value = currentVal;
@@ -222,9 +210,6 @@ function renderVotesSmart() {
   });
 }
 
-
-
-// --- COMMUNICATION ---
 
 function sendAnswers() {
   const data = {};
@@ -260,7 +245,7 @@ function sendVotes() {
     body: JSON.stringify(data)
   }).then(() => {
       statusEl.textContent = "Votes pris en compte !";
-      // On ne vide pas localVotes ici pour garder l'état visuel
+      
   });
 }
 
@@ -269,7 +254,7 @@ votesForm.onsubmit = function(e) {
   sendVotes();
 };
 
-// --- WEBSOCKET ---
+
 
 function connectWS() {
   const proto = location.protocol === "https:" ? "wss" : "ws";
@@ -290,5 +275,5 @@ function connectWS() {
 }
 
 connectWS();
-setInterval(fetchState, 5000); // Polling de sécurité
-setInterval(updateHeaderInfo, 1000); // Timer visuel
+setInterval(fetchState, 5000); 
+setInterval(updateHeaderInfo, 1000); 
