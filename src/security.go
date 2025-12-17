@@ -75,3 +75,9 @@ func GetSessionUserID(r *http.Request) (int, error) {
 	}
 	return userID, nil
 }
+
+func DeleteSession(sessionID string) {
+	sessionsMu.Lock()
+	delete(sessions, sessionID)
+	sessionsMu.Unlock()
+}

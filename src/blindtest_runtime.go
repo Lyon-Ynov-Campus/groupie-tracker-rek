@@ -32,6 +32,8 @@ var (
 	blindtestGames   = map[int]*BlindtestGame{} // roomID -> game
 )
 
+// le GetBlindtestGame récupère la partie de blindtest associée à une salle donnée
+
 func GetBlindtestGame(roomID int) (*BlindtestGame, bool) {
 	blindtestGamesMu.Lock()
 	defer blindtestGamesMu.Unlock()

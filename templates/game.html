@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Blindtest</title>
   <link rel="stylesheet" href="/static/init_salle.css">
+  <link rel="stylesheet" href="/static/scoreboard.css">
   <link rel="icon" href="/static/hbbts.ico"/>
 </head>
 <body data-room-code="{{.Code}}">
@@ -27,16 +28,15 @@
 
     <p id="reveal" style="margin-top: 12px;"></p>
 
-    <section id="scoreboard" class="card" style="display:none; margin-top: 18px;">
-      <h2>Scoreboard</h2>
-      <ul id="scoreList" class="players-list"></ul>
-      <div class="form-actions">
-        <button type="button" id="replayBtn">Rejouer</button>
-        <form action="/salle/{{.Code}}/leave" method="post" style="display:inline;">
-          <button type="submit">Quitter la salle</button>
-        </form>
-      </div>
+     <section id="scoreboard" class="card" style="display:none; margin-top: 18px;">
+    <h2>Scoreboard</h2>
+    <ul id="scoreList" class="players-list"></ul>
     </section>
+  <div class="form-actions" style="margin-top: 12px;">
+    <form action="/salle/{{.Code}}/leave" method="post" style="display:inline;">
+      <button type="submit">Quitter la salle</button>
+    </form>
+  </div>
 
     <div class="form-actions" style="margin-top: 12px;">
       <a href="/salle/{{.Code}}" style="text-decoration:none;">
@@ -46,5 +46,6 @@
   </main>
 
   <script src="/static/match_script.js" defer></script>
+  <script src="/static/match_petitbac.js" defer></script>
 </body>
 </html>

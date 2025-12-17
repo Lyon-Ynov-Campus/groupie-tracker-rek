@@ -1,6 +1,6 @@
 # Groupie Tracker - Jeu Multijoueur
 
-Salut ! C'est mon projet de jeux en ligne. J'ai fait ça pour apprendre Go et faire jouer mes potes ensemble.
+Salut ! C'est un  projet de jeux en ligne. il a été fait par Ryan, Kerem et Edvige pour apprendre Go et faire jouer nos potes ensemble.
 
 ## C'est quoi ?
 
@@ -85,7 +85,7 @@ Après ouvre ton navigateur et va sur : `http://localhost:8080`
 ### Jouer au Blindtest
 
 1. La musique démarre automatiquement
-2. Tu as 30 secondes pour deviner le titre
+2. Tu as un nombre de secondes pour deviner le titre
 3. Tape juste le titre (pas l'artiste)
 4. Clique sur valider
 5. À la fin tu vois les scores
@@ -127,7 +127,7 @@ groupie-tracker-rek/
 
 ## Technologies
 
-J'ai utilisé :
+On a utilisé :
 - Go pour le backend
 - SQLite pour la base de données (c'est simple)
 - WebSocket pour le temps réel
@@ -144,7 +144,7 @@ go mod tidy
 ### Le port 8080 est déjà utilisé
 Ouvre `main.go` et change la dernière ligne :
 ```go
-http.ListenAndServe(":3000", nil) // Change le 8080 en 3000
+http.ListenAndServe(":3000", nil) 
 ```
 
 ### La base de données est buguée

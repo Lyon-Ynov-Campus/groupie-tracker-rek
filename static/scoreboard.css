@@ -1,0 +1,100 @@
+/* --- SCOREBOARD ÉLÉGANT (GRID) --- */
+
+#scoreboard.card {
+  background: rgba(18, 22, 45, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  padding: 0; /* On gère le padding dans la liste */
+  overflow: hidden;
+}
+
+#scoreboard h2 {
+  margin: 24px 24px 10px;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  opacity: 0.9;
+}
+
+#scoreList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Grille responsive */
+  gap: 12px;
+  padding: 20px 24px 30px;
+  list-style: none;
+  margin: 0;
+}
+
+/* La carte du joueur */
+.score-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s;
+  position: relative;
+}
+
+.score-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Style spécifique pour MOI */
+.score-card.is-me {
+  background: linear-gradient(145deg, rgba(79, 140, 255, 0.15) 0%, rgba(79, 140, 255, 0.02) 100%);
+  border: 1px solid rgba(79, 140, 255, 0.4);
+  box-shadow: 0 0 20px rgba(79, 140, 255, 0.1);
+}
+
+/* Avatar Rond */
+.avatar-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 12px;
+  background: #2c3e50;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* Couleurs Avatar */
+.av-0 { background: linear-gradient(135deg, #FF512F, #DD2476); }
+.av-1 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.av-2 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+.av-3 { background: linear-gradient(135deg, #fa709a, #fee140); }
+.av-4 { background: linear-gradient(135deg, #667eea, #764ba2); }
+
+/* Infos Texte */
+.score-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #e6e9ff;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.score-value {
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(255,255,255,0.2);
+}
+
+.score-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 1px;
+}
