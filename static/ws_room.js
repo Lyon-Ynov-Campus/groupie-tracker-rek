@@ -19,7 +19,7 @@
         return;
       }
     } catch (e) {
-      // ignore malformed messages
+      
     }
   };
 })();

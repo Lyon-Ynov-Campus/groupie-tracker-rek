@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
 
+// BlindtestTrack représente une piste jouable
 type BlindtestTrack struct {
 	TrackID    int64
 	PreviewURL string
@@ -18,23 +20,8 @@ type BlindtestTrack struct {
 	Artist     string
 }
 
-type deezerGenre struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-}
-type deezerGenresResp struct {
-	Data []deezerGenre `json:"data"`
-}
-
-type deezerRadio struct {
-	ID    int64  `json:"id"`
-	Title string `json:"title"`
-}
-type deezerRadiosResp struct {
-	Data []deezerRadio `json:"data"`
-}
-
-type deezerRadioTracksResp struct {
+// Structure simplifiée pour lire la réponse JSON de Deezer
+type deezerResp struct {
 	Data []struct {
 		ID      int64  `json:"id"`
 		Title   string `json:"title"`
@@ -45,134 +32,93 @@ type deezerRadioTracksResp struct {
 	} `json:"data"`
 }
 
-func deezerDoJSON(ctx context.Context, url string, out any) error {
+// Fonction utilitaire pour télécharger le JSON
+func deezerGet(ctx context.Context, url string, out any) error {
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: 5 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode/100 != 2 {
-		return fmt.Errorf("deezer status %d", resp.StatusCode)
-	}
 	return json.NewDecoder(resp.Body).Decode(out)
 }
 
-func deezerGenreNameForType(playlistType string) (string, error) {
-	switch strings.ToLower(strings.TrimSpace(playlistType)) {
+// Choix intelligent de la playlist (Mélange FR/Inter inclus dans ces playlists)
+func getSimpleQuery(genre string) string {
+	switch strings.ToLower(strings.TrimSpace(genre)) {
 	case "rock":
-		return "Rock", nil
+		return "Best of Rock"
 	case "rap":
-		// Deezer utilise souvent ce label
-		return "Rap/Hip Hop", nil
+		return "Rap Hits"
 	case "pop":
-		return "Pop", nil
+		return "Pop Hits"
 	default:
-		return "", errors.New("playlist invalide (Rock/Rap/Pop)")
+		return "Top " + genre
 	}
 }
 
-func resolveDeezerGenreID(ctx context.Context, wantedName string) (int64, error) {
-	var resp deezerGenresResp
-	if err := deezerDoJSON(ctx, "https://api.deezer.com/genre", &resp); err != nil {
-		return 0, err
-	}
-	for _, g := range resp.Data {
-		if strings.EqualFold(strings.TrimSpace(g.Name), strings.TrimSpace(wantedName)) {
-			return g.ID, nil
-		}
-	}
-	return 0, fmt.Errorf("genre Deezer introuvable: %s", wantedName)
-}
-
-func isFrenchRadio(title string) bool {
-	lower := strings.ToLower(title)
-	keywords := []string{"france", "français", "francais", "french", "chanson"}
-	for _, kw := range keywords {
-		if strings.Contains(lower, kw) {
-			return true
-		}
-	}
-	return false
-}
-
-func selectRadios(radios []deezerRadio) []deezerRadio {
-	var french []deezerRadio
-	for _, r := range radios {
-		if isFrenchRadio(r.Title) {
-			french = append(french, r)
-		}
-	}
-
-	// Si radios françaises existent, en prendre une + une aléatoire
-	if len(french) > 0 {
-		selected := []deezerRadio{french[rand.Intn(len(french))]}
-		// Ajouter une radio aléatoire supplémentaire pour varier
-		if len(radios) > 1 {
-			selected = append(selected, radios[rand.Intn(len(radios))])
-		}
-		return selected
-	}
-	// Sinon, retourner une radio aléatoire
-	return []deezerRadio{radios[rand.Intn(len(radios))]}
-}
+// FetchDeezerGenreTracks récupère 500 titres, mélange, et renvoie les 100 meilleurs
 
 func FetchDeezerGenreTracks(ctx context.Context, playlistType string) ([]BlindtestTrack, error) {
-	genreName, err := deezerGenreNameForType(playlistType)
-	if err != nil {
+	// la proicédure est la suivante : commence tout dabord
+	// 1. Trouver la meilleure playlist pour le genre
+
+	query := getSimpleQuery(playlistType)
+
+	// On cherche la playlist la mieux notée (RATING_DESC) genre ce qui est dejà confirmé par les utilisateurs
+
+	searchURL := fmt.Sprintf("https://api.deezer.com/search/playlist?q=%s&order=RATING_DESC&limit=1", url.QueryEscape(query))
+
+	var searchResp deezerResp
+	if err := deezerGet(ctx, searchURL, &searchResp); err != nil || len(searchResp.Data) == 0 {
+		return nil, errors.New("aucune playlist trouvée")
+	}
+
+	bestPlaylistID := searchResp.Data[0].ID
+
+	// 2. LE SECRET DE LA VARIÉTÉ : On récupère 500 chansons (le max) pour eviter que un joeurs capte les musique a force d'y jouer.
+
+	tracksURL := fmt.Sprintf("https://api.deezer.com/playlist/%d/tracks?limit=500", bestPlaylistID)
+	var tracksResp deezerResp
+	if err := deezerGet(ctx, tracksURL, &tracksResp); err != nil {
 		return nil, err
 	}
 
-	genreID, err := resolveDeezerGenreID(ctx, genreName)
-	if err != nil {
-		return nil, err
-	}
+	// 3. Filtrage : On garde uniquement celles avec un extrait audio pour pouvoir jouer en fonction du temps imparti configurer par l'administrateur de la salle
 
-	var radios deezerRadiosResp
-	if err := deezerDoJSON(ctx, fmt.Sprintf("https://api.deezer.com/genre/%d/radios", genreID), &radios); err != nil {
-		return nil, err
-	}
-	if len(radios.Data) == 0 {
-		return nil, fmt.Errorf("aucune radio Deezer pour le genre %s", genreName)
-	}
+	var cleanTracks []BlindtestTrack
+	seen := make(map[int64]bool)
 
-	// Sélectionner radios avec biais français
-	selectedRadios := selectRadios(radios.Data)
-
-	// Récupérer et fusionner les tracks
-	trackMap := make(map[int64]BlindtestTrack)
-
-	for _, radio := range selectedRadios {
-		var tracksResp deezerRadioTracksResp
-		if err := deezerDoJSON(ctx, fmt.Sprintf("https://api.deezer.com/radio/%d/tracks?limit=200", radio.ID), &tracksResp); err != nil {
-			continue // Ignorer si une radio échoue
+	for _, t := range tracksResp.Data {
+		if t.Preview == "" || seen[t.ID] {
+			continue
 		}
+		seen[t.ID] = true
 
-		for _, t := range tracksResp.Data {
-			if strings.TrimSpace(t.Preview) == "" {
-				continue
-			}
-			// Ajouter si pas déjà vu (déduplication)
-			if _, exists := trackMap[t.ID]; !exists {
-				trackMap[t.ID] = BlindtestTrack{
-					TrackID:    t.ID,
-					PreviewURL: t.Preview,
-					Title:      t.Title,
-					Artist:     t.Artist.Name,
-				}
-			}
-		}
+		cleanTracks = append(cleanTracks, BlindtestTrack{
+			TrackID:    t.ID,
+			PreviewURL: t.Preview,
+			Title:      t.Title,
+			Artist:     t.Artist.Name,
+		})
 	}
 
-	// Convertir map en slice
-	out := make([]BlindtestTrack, 0, len(trackMap))
-	for _, track := range trackMap {
-		out = append(out, track)
+	if len(cleanTracks) == 0 {
+		return nil, errors.New("aucune chanson jouable trouvée")
 	}
 
-	if len(out) == 0 {
-		return nil, errors.New("aucun track avec preview trouvé")
+	// 4. LE SHUFFLE : On mélange tout le paquet genre remier pour rendre la sélection aléatoire
+
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(cleanTracks), func(i, j int) {
+		cleanTracks[i], cleanTracks[j] = cleanTracks[j], cleanTracks[i]
+	})
+
+	// 5. LA COUPE : On ne garde que les 100 premières du mélange pour la partie pour éviter les répétitions
+	if len(cleanTracks) > 100 {
+		cleanTracks = cleanTracks[:100]
 	}
-	return out, nil
+
+	return cleanTracks, nil
 }

@@ -1,207 +1,188 @@
-# Groupie Tracker - Jeu Multijoueur
+# 🎵 Groupie Tracker REK – Le jeu multi entre potes
 
-Salut ! C'est un  projet de jeux en ligne. il a été fait par Ryan, Kerem et Edvige pour apprendre Go et faire jouer nos potes ensemble.
+Bienvenue sur **Groupie Tracker** !  
+C’est un projet qu’on a codé à plusieurs pour apprendre Go, s’amuser, et faire jouer nos potes ensemble.  
+Ici, tu peux lancer un **Blindtest** ou un **Petit Bac** , inviter tes amis, et voir qui est le boss du game.
 
-## C'est quoi ?
+---
 
-C'est un site web où tu peux jouer à des jeux avec tes amis :
-- Un blindtest (devine la musique)
-- Un petit bac (pas encore fini lol)
+## 🚀 C’est quoi ce projet ?
 
-Tu crées une salle, tu donnes le code à tes potes et vous jouez ensemble !
+Un site web où tu peux :
 
-## Comment ça marche ?
+- Créer un compte (**alerte spoiler** : sans compte tu peux pas jouer mon pote)
+- Créer ou rejoindre une salle
+- Mets un pseudo, un mail, un mot de passe (⚠️ il te faudra respecter le règlement CNIL : ton mot de passe doit faire au moins 8 caractères, contenir une majuscule, une minuscule, un chiffre et un caractère spécial… oui, c’est relou, mais c’est la loi !)
 
-### Ce qu'il faut avoir sur ton PC
+## 🎮 Jouer
 
-Tu dois installer Go. Va sur https://go.dev/dl/ et télécharge la version pour ton système.
+### 1. Créer ou rejoindre une salle
 
-Pour vérifier que c'est bon :
+- Tu te connectes, tu choisis ton jeu (Blindtest ou Petit Bac)
+- Clique sur “Créer une salle” ou “Rejoindre une salle”
+- Invite tes amis avec le code de la salle
+- Pour le Blindtest, tu choisis le type de musique : rap, pop ou rock (désolé pour les fans de jazz, on fera mieux la prochaine fois 😅)
+
+---
+
+## 🛠️ Comment installer et lancer le projet
+
+### 1. Prérequis
+
+- **Go** (version 1.21 ou plus récent)
+- Un navigateur web (Chrome, Firefox, Edge, …)
+- (Optionnel) Des potes pour jouer avec toi 😁
+
+### 2. Récupérer le projet
+
+Clone ou télécharge ce repo :
+
 ```bash
-go version
+git clone https://github.com/tonuser/groupie-tracker-rek.git
+cd groupie-tracker-rek
 ```
 
-Si ça affiche un truc comme "go version 1.21" c'est bon.
-
-### Installation
-
-1. Télécharge le projet (ou clone le si tu connais git)
-2. Ouvre un terminal dans le dossier
-3. Lance cette commande :
+### 3. Installer les dépendances Go
 
 ```bash
 go mod download
 ```
 
-Si ça marche pas, essaye :
+Si ça râle, tente :
+
 ```bash
 go mod init rek
 go mod tidy
 ```
 
-### Lancer le serveur
-
-Dans le terminal, tape juste :
+### 4. Lancer le serveur
 
 ```bash
 go run main.go
 ```
 
-Tu devrais voir :
-```
-Base de données initialisée avec succès.
-```
+Tu dois voir :  
+`Base de données initialisée avec succès.`
 
-Après ouvre ton navigateur et va sur : `http://localhost:8080`
+### 5. Ouvrir le site
 
-## Comment jouer
-
-### Créer un compte
-
-1. Clique sur "S'inscrire"
-2. Mets un nom, un email et un mot de passe
-3. Clique sur créer
-
-### Se connecter
-
-1. Clique sur "Se connecter"
-2. Tape ton email et mot de passe
-3. Tu arrives sur le tableau de bord
-
-### Créer une partie
-
-1. Clique sur "Créer une salle"
-2. Choisis le jeu (pour l'instant y'a que le blindtest qui marche bien)
-3. Note le code qui s'affiche (genre ABC123)
-4. Donne ce code à tes amis
-
-### Rejoindre une partie
-
-1. Ton pote te donne un code
-2. Clique sur "Rejoindre une salle"
-3. Entre le code
-4. Attend que le créateur lance la partie
-
-### Jouer au Blindtest
-
-1. La musique démarre automatiquement
-2. Tu as un nombre de secondes pour deviner le titre
-3. Tape juste le titre (pas l'artiste)
-4. Clique sur valider
-5. À la fin tu vois les scores
-
-## Organisation des fichiers
-
-```
-groupie-tracker-rek/
-├── main.go              # Le fichier principal qui lance tout
-├── rek.db               # La base de données (se crée tout seul)
-├── src/                 # Tout le code du serveur
-├── templates/           # Les pages HTML
-└── static/              # Les CSS et JavaScript
-```
-
-### Les fichiers importants
-
-- `main.go` : C'est là que tout commence
-- `src/handlers.go` : Gère les pages (accueil, connexion, etc)
-- `src/createroom.go` : Pour créer et rejoindre les salles
-- `src/blindtest_match.go` : La logique du blindtest
-- `src/ws_handler.go` : Les websockets (pour le temps réel)
-- `templates/game.html` : La page du jeu
-- `static/match_script.js` : Le JavaScript du blindtest
-
-## Les routes (URLs)
-
-### Pages publiques
-- `/` : Page d'accueil
-- `/connexion` : Se connecter
-- `/register` : S'inscrire
-
-### Pages privées (faut être connecté)
-- `/dashboard` : Tableau de bord
-- `/salle-initialisation` : Créer une salle
-- `/rejoindre-salle` : Rejoindre une salle
-- `/salle/{code}` : La salle d'attente
-- `/game/{code}` : Le jeu
-
-## Technologies
-
-On a utilisé :
-- Go pour le backend
-- SQLite pour la base de données (c'est simple)
-- WebSocket pour le temps réel
-- HTML/CSS/JavaScript basique pour le front
-
-## Si ça marche pas
-
-### Erreur "cannot find package"
-```bash
-go mod download
-go mod tidy
-```
-
-### Le port 8080 est déjà utilisé
-Ouvre `main.go` et change la dernière ligne :
-```go
-http.ListenAndServe(":3000", nil) 
-```
-
-### La base de données est buguée
-Supprime le fichier `rek.db` et relance :
-```bash
-rm rek.db
-go run main.go
-```
-
-### Le WebSocket se déconnecte
-Rafraîchis la page (F5). Sinon regarde dans la console du navigateur (F12) pour voir l'erreur.
-
-### Pas de son dans le blindtest
-- Vérifie ta connexion internet
-- Autorise le son dans ton navigateur
-- Des fois l'API Deezer bug, relance la partie
-
-## Trucs qui marchent pas encore
-
-- Le bouton "Quitter" dans le jeu marche pas (j'ai oublié de faire la route)
-- Le petit bac est pas terminé
-- Des fois les routes bugent entre elles (je sais pas trop pourquoi)
-- La base de données est pas bien partagée entre les fonctions (je corrigerai)
-
-## Ce que je veux ajouter
-
-- Finir le petit bac
-- Corriger le bouton quitter
-- Faire un chat dans les salles
-- Ajouter des avatars
-- Faire un classement général
-- Rendre ça plus joli sur mobile
-
-## Bugs connus
-
-1. Si tu quittes la page pendant le jeu, ça bug un peu
-2. Parfois les scores s'affichent en double (j'ai pas compris pourquoi)
-3. Le timer peut décaler entre les joueurs
-4. Si tu rafraîchis pendant une partie, t'es éjecté
-
-## Notes
-
-- Les mots de passe sont chiffrés (bcrypt)
-- J'ai fait ça en quelques semaines pour apprendre
-- C'est pas parfait mais ça marche plutôt bien
-- N'hésite pas à me dire si tu trouves des bugs
-
-## Aide
-
-Si t'as un problème :
-1. Regarde les erreurs dans le terminal
-2. Ouvre la console du navigateur (F12)
-3. Essaye de redémarrer le serveur
-4. Vérifie que t'es bien connecté à internet
+Va sur [http://localhost:8080](http://localhost:8080) dans ton navigateur.
 
 ---
 
-Fait avec ❤️ pour apprendre Go
+## 👤 Créer un compte
 
-PS : C'est mon premier gros projet en Go alors soyez indulgents ! 😅
+- Clique sur “S’inscrire”
+- Mets un pseudo, un mail, un mot de passe
+- Valide, puis connecte-toi
+
+---
+
+## 🎮 Jouer
+
+### 1. Créer ou rejoindre une salle
+
+- Clique sur “Créer une salle” ou “Rejoindre une salle”
+- Choisis ton jeu (Blindtest ou Petit Bac)
+- Invite tes amis avec le code de la salle
+
+### 2. Blindtest
+
+- Le jeu lance un extrait musical à chaque manche
+- Tape ta réponse (titre ou artiste)
+- Plus tu réponds vite, plus tu gagnes de points
+- Le scoreboard s’affiche à la fin
+
+### 3. Petit Bac
+
+- Une lettre et des catégories s’affichent
+- Remplis tes réponses le plus vite possible
+- Ensuite, tu votes sur les réponses des autres (valide ou refusé)
+- Le scoreboard s’affiche à la fin
+
+- **Bonus** : Quand tu crées une salle Petit Bac, tu peux choisir les catégories (Artiste, Album, Groupe de musique.... ), en ajouter ou en supprimer comme tu veux avant de lancer la partie !
+- Si tu enregistres tes catégories, il faudra revenir à la salle pour commencer le jeu (un bouton est prévu pour ça)
+- Et si tu t’es trompé de jeu, pas de panique : tu peux toujours revenir au choix du jeu grâce à un bouton "Changer de jeu"
+
+---
+
+## 🖌️ Le design
+
+- CSS moderne, responsive, avec un peu de glow et de fun
+- Scoreboard stylé, avatars colorés, tout pour l’ambiance
+
+---
+
+## 🗂️ Structure du projet
+
+```
+groupie-tracker-rek/
+│
+├── main.go                  # Point d’entrée du serveur Go
+├── go.mod                   # Dépendances Go
+│
+├── src/                     # Code backend (Go)
+│   ├── createroom.go        # Logique création de salle
+│   ├── handlers.go          # Handlers HTTP principaux
+│   ├── gameconfig.go        # Config des jeux (catégories, playlists)
+│   ├── petitbac_logic.go    # Logique du jeu Petit Bac
+│   ├── blindtest_runtime.go # Logique du jeu Blindtest
+│   ├── ws_handler.go        # WebSocket handler
+│   ├── ...                  # (autres fichiers Go)
+│
+├── templates/               # Templates HTML (Go)
+│   ├── accueil.html         # Page d’inscription
+│   ├── authentification.html# Page de connexion
+│   ├── landingpage.html     # Sélection du jeu
+│   ├── salle.html           # Salle d’attente
+│   ├── game.html            # Blindtest
+│   ├── petitbac.html        # Petit Bac
+│   ├── ...                  # (autres pages)
+│
+├── static/                  # Fichiers statiques (CSS, JS, images)
+│   ├── init_salle.css       # Style principal
+│   ├── scoreboard.css       # Style du scoreboard
+│   ├── landingpage.css      # Style de la page d’accueil
+│   ├── match_script.js      # JS du Blindtest
+│   ├── match_petitbac.js    # JS du Petit Bac
+│   ├── scoreboard_render.js # Rendu JS du scoreboard (commun)
+│   ├── ...                  # (autres assets)
+│
+└── readme.md                # Ce fichier !
+```
+
+- **src/** : tout le backend Go (logique, API, WebSocket, BDD…)
+- **templates/** : les pages HTML générées côté serveur
+- **static/** : tout ce qui est chargé côté client (CSS, JS, images)
+- **main.go** : le serveur web qui lance tout
+
+---
+
+Tu veux comprendre ou modifier un truc ?  
+→ Cherche dans le dossier qui correspond à ce que tu veux toucher (backend, frontend, style, etc.)  
+→ Et si tu galères, demande à un pote ou ouvre une issue !
+
+---
+
+## 🐞 Bugs connus / TODO
+
+- Le projet est en mode “apprentissage”, donc il peut y avoir des bugs (n’hésite pas à ouvrir une issue ou à corriger !)
+- Le code est perfectible, mais il fait le taf pour jouer entre amis
+
+---
+
+## 🙏 Remerciements
+
+Merci à tous ceux qui ont testé, donné des idées, ou juste mis l’ambiance pendant les parties !  
+Projet fait avec ❤️ par Ryan, Kerem et Edvige 
+
+---
+
+## 📢 Disclaimer
+
+C’est un projet étudiant, pas une app pro.  
+Si tu veux t’en inspirer, go ! Si tu veux l’améliorer, encore mieux !
+
+---
+
+Bon jeu ! 🎉

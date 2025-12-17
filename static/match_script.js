@@ -7,15 +7,20 @@
   const timerEl = document.getElementById("timer");
   const revealEl = document.getElementById("reveal");
   const scoreboard = document.getElementById("scoreboard");
-  const scoreList = document.getElementById("scoreList");
+  // scoreList est désormais géré par scoreboard_render.js
   const replayBtn = document.getElementById("replayBtn");
   const form = document.getElementById("guessForm");
   const guessInput = document.getElementById("guess");
 
   let endsAtUnix = 0;
   let phase = "idle";
-  let currentRound = 0;
-  let totalRounds = 0;
+  
+  // --- NOUVEAU : Initialisation de l'état global pour le scoreboard externe ---
+  window.state = {
+    players: [],
+    userID: 0, // Sera rempli si l'API le renvoie
+    phase: "idle"
+  };
 
   function api(path) {
     return `/api/salle/${encodeURIComponent(code)}/blindtest/${path}`;
@@ -26,6 +31,8 @@
 
   function setPhase(p) {
     phase = p || "idle";
+    // Synchro avec l'état global pour le renderer
+    window.state.phase = phase;
   }
 
   function startTimerUI() {
@@ -63,6 +70,9 @@
     const st = await res.json();
 
     setPhase(st.phase);
+    // Si l'API renvoie l'ID utilisateur, on le stocke pour le surlignage "Moi"
+    if (st.userID) window.state.userID = st.userID;
+
     currentRound = st.round || 0;
     totalRounds = st.total_rounds || 0;
     endsAtUnix = st.ends_at_unix || 0;
@@ -72,7 +82,7 @@
       form.style.display = "none";
       revealEl.textContent = "";
       audio.pause();
-      hideScoreboard();
+      if (scoreboard) scoreboard.style.display = "none";
       return;
     }
 
@@ -83,7 +93,7 @@
       guessInput.disabled = !!st.already_tried;
       if (st.preview_url) playPreviewLoop(st.preview_url);
       startTimerUI();
-      hideScoreboard();
+      if (scoreboard) scoreboard.style.display = "none";
       return;
     }
 
@@ -95,47 +105,35 @@
       if (st.title || st.artist) {
         revealEl.textContent = `Réponse : ${st.title || ""} — ${st.artist || ""}`;
       }
-      if (phase === "finished") {
-        endsAtUnix = 0;
-        timerEl.textContent = "";
-        await loadScoreboard(true);
-      }
+      
+      // CHARGEMENT DU SCOREBOARD VIA LE NOUVEAU SYSTÈME
+      await loadAndRenderScoreboard(true);
       return;
     }
   }
 
-  function hideScoreboard() {
-    if (scoreboard) scoreboard.style.display = "none";
-  }
-
-  async function loadScoreboard(show) {
+  // --- NOUVELLE FONCTION DE CHARGEMENT ---
+  async function loadAndRenderScoreboard(show) {
     if (!scoreboard) return;
     try {
       const res = await fetch(playersApi());
       if (!res.ok) return;
+      
       const players = await res.json();
-      scoreList.innerHTML = "";
-      if (!players.length) {
-        scoreList.innerHTML = '<li class="player-empty">Aucun joueur</li>';
-      } else {
-        players.forEach((p, idx) => {
-          const li = document.createElement("li");
-          li.className = "player-item";
-          const pseudo = p.Pseudo || `Joueur ${idx + 1}`;
-          const score = p.Score ?? 0;
-          li.innerHTML = `
-            <div class="player-left">
-              <span class="player-name">${idx + 1}. ${pseudo}</span>
-            </div>
-            <div class="player-right">
-              <span class="player-score">${score} pts</span>
-            </div>
-          `;
-          scoreList.appendChild(li);
-        });
+      
+      // 1. Mettre à jour les données globales
+      window.state.players = players;
+      
+      // 2. Appeler le moteur de rendu externe (scoreboard_render.js)
+      if (typeof renderScoreboard === "function") {
+        renderScoreboard(); 
       }
+
+      // 3. Afficher la section
       if (show) scoreboard.style.display = "";
-    } catch (_) {}
+    } catch (e) {
+      console.error("Erreur chargement scoreboard:", e);
+    }
   }
 
   const proto = (location.protocol === "https:") ? "wss" : "ws";
@@ -148,14 +146,12 @@
 
       if (msg.type === "blindtest_round_started") {
         setPhase("playing");
-        currentRound = msg.payload.round;
-        totalRounds = msg.payload.total_rounds;
-        statusEl.textContent = `Manche ${currentRound}/${totalRounds}`;
+        statusEl.textContent = `Manche ${msg.payload.round}/${msg.payload.total_rounds}`;
         revealEl.textContent = "";
         endsAtUnix = msg.payload.ends_at_unix;
         guessInput.disabled = false;
         guessInput.value = "";
-        hideScoreboard();
+        if (scoreboard) scoreboard.style.display = "none";
         playPreviewLoop(msg.payload.preview_url);
         startTimerUI();
         return;
@@ -167,6 +163,8 @@
         guessInput.disabled = true;
         statusEl.textContent = "Révélation…";
         revealEl.textContent = `Réponse : ${msg.payload.title} — ${msg.payload.artist}`;
+        // Afficher les scores à la révélation
+        loadAndRenderScoreboard(true);
         return;
       }
 
@@ -177,12 +175,12 @@
         audio.pause();
         form.style.display = "none";
         statusEl.textContent = "Partie terminée";
-        loadScoreboard(true).catch(() => {});
+        loadAndRenderScoreboard(true).catch(() => {});
         return;
       }
 
-      if (msg.type === "room_updated" && phase === "finished") {
-        loadScoreboard(false).catch(() => {});
+      if (msg.type === "room_updated" && (phase === "finished" || phase === "reveal")) {
+        loadAndRenderScoreboard(true).catch(() => {});
         return;
       }
     } catch (_) {}
