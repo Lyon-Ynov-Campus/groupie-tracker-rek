@@ -1,6 +1,6 @@
-# 🎵 Groupie Tracker REK – Le jeu multi entre potes
+# 🎵 HabiBeats - REK : Le jeu multi entre potes
 
-Bienvenue sur **Groupie Tracker** !  
+Bienvenue sur **HabiBeats** !  
 C’est un projet qu’on a codé à plusieurs pour apprendre Go, s’amuser, et faire jouer nos potes ensemble.  
 Ici, tu peux lancer un **Blindtest** ou un **Petit Bac** , inviter tes amis, et voir qui est le boss du game.
 
