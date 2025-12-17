@@ -21,7 +21,7 @@ Un site web où tu peux :
 - Tu te connectes, tu choisis ton jeu (Blindtest ou Petit Bac)
 - Clique sur “Créer une salle” ou “Rejoindre une salle”
 - Invite tes amis avec le code de la salle
-- Pour le Blindtest, tu choisis le type de musique : rap, pop ou rock (désolé pour les fans de jazz, on fera mieux la prochaine fois 😅)
+- Pour le Blindtest, tu choisis le type de musique : rap, pop ou rock (désolé pour les fans de jazz, on fera mieux la prochaine fois)
 
 ---
 
@@ -159,21 +159,25 @@ groupie-tracker-rek/
 ---
 
 Tu veux comprendre ou modifier un truc ?  
-→ Cherche dans le dossier qui correspond à ce que tu veux toucher (backend, frontend, style, etc.)  
-→ Et si tu galères, demande à un pote ou ouvre une issue !
+→ Cherche dans le dossier qui correspond à ce que tu veux toucher (backend, frontend, style, etc.)
 
 ---
 
-## 🐞 Bugs connus / TODO
+## Bugs connus / TODO
 
-- Le projet est en mode “apprentissage”, donc il peut y avoir des bugs (n’hésite pas à ouvrir une issue ou à corriger !)
-- Le code est perfectible, mais il fait le taf pour jouer entre amis
+- Nous sommes encore en “apprentissage”, donc il peut y avoir des bugs (n’hésite pas à nous les faire parvenir !)
+- Le code est perfectible, mais il fait le boulot pour jouer entre amis
 
 ---
+
+## Intelligence Artificielle 
+
+- Nous avons utilisé l'IA, pour nous aider sur la compréhension de certains sujets (Certains pas vu en cours, d'autre fraîchement acquis.)
+- Assistance IA : CSS et JS
 
 ## 🙏 Remerciements
 
-Merci à tous ceux qui ont testé, donné des idées, ou juste mis l’ambiance pendant les parties !  
+Merci à tous ceux qui ont testé, donné des idées, ou juste mis l’ambiance avec HabiBeats !  
 Projet fait avec ❤️ par Ryan, Kerem et Edvige 
 
 ---
